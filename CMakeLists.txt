@@ -29,12 +29,12 @@ CPMAddPackage(
 # `docs/CMake API.md` in the JUCE repo for the full list.
 
 juce_add_gui_app(CanvasAnimationExample
-    # VERSION ...                       # Set this if the app version is different to the project version
-    # ICON_BIG ...                      # ICON_* arguments specify a path to an image file to use as an icon
-    # ICON_SMALL ...
+    ICON_BIG build/res/AppIcon.iconset/icon_512x512@2x.png
+    ICON_SMALL build/res/AppIcon.iconset/icon_512x512.png
     # DOCUMENT_EXTENSIONS ...           # Specify file extensions that should be associated with this app
-    # COMPANY_NAME ...                  # Specify the name of the app's author
-    PRODUCT_NAME "CanvasAnimation")     # The name of the final executable, which can differ from the target name
+    COMPANY_NAME "eschmann.io"          # Specify the name of the app's author
+    PRODUCT_NAME "CanvasAnimation"      # The name of the final executable, which can differ from the target name
+)
 
 # `juce_generate_juce_header` will create a JuceHeader.h for a given target, which will be generated
 # into your build tree. This should be included with `#include <JuceHeader.h>`. The include path for
@@ -67,7 +67,9 @@ target_compile_definitions(CanvasAnimationExample
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_gui_app` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_gui_app` call
         JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:CanvasAnimationExample,JUCE_PRODUCT_NAME>"
-        JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:CanvasAnimationExample,JUCE_VERSION>")
+        JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:CanvasAnimationExample,JUCE_VERSION>"
+        JUCE_DISPLAY_SPLASH_SCREEN=0
+)
 
 # If your target needs extra binary assets, you can add them here. The first argument is the name of
 # a new static library target that will include all the binary resources. There is an optional

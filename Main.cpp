@@ -24,7 +24,7 @@ public:
         // This method is where you should put your application's initialisation code..
         juce::ignoreUnused(commandLine);
 
-        mainWindow.reset(new MainWindow (getApplicationName()));
+        mainWindow.reset(new MainWindow(getApplicationName()));
     }
 
     void shutdown() override {
@@ -42,7 +42,7 @@ public:
         // When another instance of the app is launched while this one is running,
         // this method is invoked, and the commandLine parameter tells you what
         // the other instance's command-line arguments were.
-        juce::ignoreUnused (commandLine);
+        juce::ignoreUnused(commandLine);
     }
 
     /*
@@ -51,23 +51,23 @@ public:
     */
     class MainWindow : public juce::DocumentWindow {
     public:
-        explicit MainWindow(juce::String name) : DocumentWindow (
+        explicit MainWindow(juce::String name) : DocumentWindow(
             name,
             juce::Desktop::getInstance().getDefaultLookAndFeel()
-                .findColour (ResizableWindow::backgroundColourId),
+                .findColour(ResizableWindow::backgroundColourId),
                 DocumentWindow::allButtons
         ) {
-            setUsingNativeTitleBar (true);
-            setContentOwned (new MainComponent(), true);
+            setUsingNativeTitleBar(true);
+            setContentOwned(new MainComponent(), true);
 
         #if JUCE_IOS || JUCE_ANDROID
-            setFullScreen (true);
+            setFullScreen(true);
         #else
-            setResizable (true, true);
-            centreWithSize (getWidth(), getHeight());
+            setResizable(true, true);
+            centreWithSize(getWidth(), getHeight());
         #endif
 
-            setVisible (true);
+            setVisible(true);
         }
 
         void closeButtonPressed() override {
@@ -85,7 +85,7 @@ public:
         */
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };
 
 private:
@@ -93,4 +93,4 @@ private:
 };
 
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (GuiAppApplication)
+START_JUCE_APPLICATION(GuiAppApplication)

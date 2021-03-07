@@ -19,7 +19,9 @@ public:
     void update() override;
 
 private:
-    float x, y;
+    float x, y, inset;
+    std::tuple<float, float> calculateRelativePosition(int pixelX, int pixelY);
+    std::tuple<int, int> calculatePixelPosition(float relX, float relY);
 
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

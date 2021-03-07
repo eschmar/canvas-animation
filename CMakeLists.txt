@@ -68,7 +68,7 @@ target_compile_definitions(CanvasAnimationExample
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_gui_app` call
         JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:CanvasAnimationExample,JUCE_PRODUCT_NAME>"
         JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:CanvasAnimationExample,JUCE_VERSION>"
-        JUCE_DISPLAY_SPLASH_SCREEN=0
+        JUCE_DISPLAY_SPLASH_SCREEN=1
 )
 
 # If your target needs extra binary assets, you can add them here. The first argument is the name of

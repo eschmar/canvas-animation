@@ -5,7 +5,7 @@ MainComponent::MainComponent() {
     setFramesPerSecond (60);
     x = getWidth() * 0.5f;
     y = getHeight() * 0.5f;
-    inset = 48.0f;
+    inset = 96.0f;
 }
 
 void MainComponent::paint(juce::Graphics& g) {

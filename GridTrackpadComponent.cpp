@@ -1,6 +1,6 @@
-#include "MainComponent.h"
+#include "GridTrackpadComponent.h"
 
-MainComponent::MainComponent(
+GridTrackpadComponent::GridTrackpadComponent(
     int size_,
     int inset_,
     int fps_,
@@ -14,7 +14,7 @@ MainComponent::MainComponent(
     y = getHeight() * 0.5f;
 }
 
-void MainComponent::paint(juce::Graphics& g) {
+void GridTrackpadComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::yellow);
 
@@ -50,13 +50,13 @@ void MainComponent::paint(juce::Graphics& g) {
     }
 }
 
-void MainComponent::update() {
+void GridTrackpadComponent::update() {
     // This function is called at the frequency specified by the setFramesPerSecond() call
     // in the constructor. You can use it to update counters, animate values, etc.
 }
 
-void MainComponent::resized() {
-    // This is called when the MainComponent is resized.
+void GridTrackpadComponent::resized() {
+    // This is called when the GridTrackpadComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
 }

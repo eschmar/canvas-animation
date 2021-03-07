@@ -1,4 +1,4 @@
-#include "MainComponent.h"
+#include "GridTrackpadComponent.h"
 #include <JuceHeader.h>
 
 class GuiAppApplication  : public juce::JUCEApplication {
@@ -47,7 +47,7 @@ public:
 
     /*
         This class implements the desktop window that contains an instance of
-        our MainComponent class.
+        our GridTrackpadComponent class.
     */
     class MainWindow : public juce::DocumentWindow {
     public:
@@ -58,12 +58,12 @@ public:
                 DocumentWindow::allButtons
         ) {
             setUsingNativeTitleBar(true);
-            setContentOwned(new MainComponent(), true);
+            setContentOwned(new GridTrackpadComponent(), true);
 
         #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
         #else
-            setResizable(true, true);
+            setResizable(false, false);
             centreWithSize(getWidth(), getHeight());
         #endif
 

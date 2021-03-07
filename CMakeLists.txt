@@ -52,7 +52,7 @@ juce_generate_juce_header(CanvasAnimationExample)
 target_sources(CanvasAnimationExample
     PRIVATE
         Main.cpp
-        MainComponent.cpp
+        GridTrackpadComponent.cpp
         TrackpadComponent.cpp)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer

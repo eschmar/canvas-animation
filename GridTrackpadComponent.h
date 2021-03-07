@@ -11,10 +11,10 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent : public TrackpadComponent {
+class GridTrackpadComponent : public TrackpadComponent {
 public:
-    MainComponent() : MainComponent(512) {}
-    MainComponent(int size_, int inset_ = 96, int fps_ = 60, float radius_ = 96, float gridSize_ = 12, float maxPointSize_ = 6);
+    GridTrackpadComponent() : GridTrackpadComponent(512) {}
+    GridTrackpadComponent(int size_, int inset_ = 96, int fps_ = 60, float radius_ = 96, float gridSize_ = 12, float maxPointSize_ = 6);
     void paint (juce::Graphics&) override;
     void resized() override;
     void update() override;
@@ -22,5 +22,5 @@ public:
 private:
     float radius, gridSize, maxPointSize;
     // Your private member variables go here...
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GridTrackpadComponent)
 };

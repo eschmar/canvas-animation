@@ -5,24 +5,22 @@
 // have called `juce_generate_juce_header(<thisTarget>)` in your CMakeLists.txt,
 // you could `#include <JuceHeader.h>` here instead, to make all your module headers visible.
 #include <juce_gui_extra/juce_gui_extra.h>
+#include "TrackpadComponent.h"
 
 /*
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent : public juce::AnimatedAppComponent {
+class MainComponent : public TrackpadComponent {
 public:
-    MainComponent();
+    MainComponent() : MainComponent(512) {}
+    MainComponent(int size_, int inset_ = 96, int fps_ = 60, float radius_ = 96, float gridSize_ = 12, float maxPointSize_ = 6);
     void paint (juce::Graphics&) override;
-    void mouseDrag(const juce::MouseEvent& event) override;
     void resized() override;
     void update() override;
 
 private:
-    float x, y, inset;
-    std::tuple<float, float> calculateRelativePosition(int pixelX, int pixelY);
-    std::tuple<int, int> calculatePixelPosition(float relX, float relY);
-
+    float radius, gridSize, maxPointSize;
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

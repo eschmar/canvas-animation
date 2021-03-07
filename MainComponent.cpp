@@ -1,70 +1,53 @@
 #include "MainComponent.h"
 
-MainComponent::MainComponent() {
-    setSize(512, 512);
-    setFramesPerSecond (60);
+MainComponent::MainComponent(
+    int size_,
+    int inset_,
+    int fps_,
+    float radius_,
+    float gridSize_,
+    float maxPointSize_
+) : TrackpadComponent(size_, inset_, fps_), radius(radius_), gridSize(gridSize_), maxPointSize(maxPointSize_) {
+    setSize(size_, size_);
+    setFramesPerSecond (fps_);
     x = getWidth() * 0.5f;
     y = getHeight() * 0.5f;
-    inset = 96.0f;
 }
 
 void MainComponent::paint(juce::Graphics& g) {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    // Draggable circle
-    float radius = 16;
     g.setColour(juce::Colours::yellow);
-    g.drawEllipse(x - radius, y - radius, radius * 2, radius * 2, 3);
 
-    // Hello wolrd
-    g.setFont (juce::Font (16.0f));
-    g.setColour (juce::Colours::white);
-    g.drawText ("Hello World!", getLocalBounds(), juce::Justification::centred, true);
-}
+    for (int i = 0; i <= (float) getHeight() / gridSize; i++) {
+        int centerY = (int) (i * gridSize);
 
-void MainComponent::mouseDrag(const juce::MouseEvent& event) {
-    // printf(">>> <x,y>=<%d,%d>\n", event.x, event.y);
-    std::tuple<float, float> relPos = calculateRelativePosition(event.x, event.y);
-    std::tuple<float, float> absPos = calculatePixelPosition(std::get<0>(relPos), std::get<1>(relPos));
-    x = std::get<0>(absPos);
-    y = std::get<1>(absPos);
-    // printf(">>> <x',y'>=<%.2f,%.2f>\n", x, y);
-}
+        for (int j = 0; j <= (float) getWidth() / gridSize; j++) {
+            int centerX = (int) (j * gridSize);
 
-/**
- * Translates the coordinate position to relative values.
- *
- * @return Relative coordinate position.
- */
-std::tuple<float, float> MainComponent::calculateRelativePosition(int pixelX, int pixelY) {
-    float relX, relY;
+            if (inset > 0) {
+                if (centerX < (inset * 0.5) || centerX > getWidth() - (inset * 0.5)) continue;
+                if (centerY < (inset * 0.5) || centerY > getHeight() - (inset * 0.5)) continue;
+            }
 
-    relX = (pixelX - inset * 0.5f) / ((float) getWidth() - inset);
-    relY = (pixelY - inset * 0.5f) / ((float) getHeight() - inset);
+            // double distance = MathHelper.euclideanDistance(centerX, centerY, xToDraw, yToDraw);
+            // return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+            double distance = std::sqrt(std::pow(centerX - x, 2) + std::pow(centerY - y, 2));
 
-    return {
-        std::min(1.0f, std::max(0.0f, relX)),
-        std::min(1.0f, std::max(0.0f, relY))
-    };
-}
+            double ratio = distance / radius;
 
-/**
- * Translates the coordinate position to relative values.
- *
- * @return Returns relative coordinate position.
- */
-std::tuple<int, int> MainComponent::calculatePixelPosition(float relX, float relY) {
-    int posX, posY;
+            int posX = centerX;
+            int posY = centerY;
 
-    float halfInset = inset * 0.5f;
-    posX = (int) (relX * ((float) getWidth() - inset) + halfInset);
-    posY = (int) (relY * ((float) getHeight() - inset) + halfInset);
+            if (ratio <= 1) {
+                posX = posX - ((int) ((x - posX) * (1 - ratio) * 0.5));
+                posY = posY - ((int) ((y - posY) * (1 - ratio) * 0.5));
+            }
 
-    return {
-        std::min(getWidth() - (int) halfInset, (int) std::max((int) halfInset, posX)),
-        std::min(getHeight() - (int) halfInset,(int) std::max((int) halfInset, posY)),
-    };
+            // Scale individual point size between 2 and maxPointSize to introduce scaling effect.
+            float pointSize = std::max(2.0f, maxPointSize * (1.0f - std::min(1.0f, (float) ratio)));
+            g.fillEllipse(posX, posY, pointSize, pointSize);
+        }
+    }
 }
 
 void MainComponent::update() {

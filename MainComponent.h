@@ -14,10 +14,13 @@ class MainComponent : public juce::AnimatedAppComponent {
 public:
     MainComponent();
     void paint (juce::Graphics&) override;
+    void mouseDrag(const juce::MouseEvent& event) override;
     void resized() override;
     void update() override;
 
 private:
+    float x, y;
+
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

@@ -1,4 +1,5 @@
 #include "GridTrackpadComponent.h"
+#include "UnknownPleasuresComponent.h"
 #include <JuceHeader.h>
 
 class GuiAppApplication  : public juce::JUCEApplication {
@@ -58,7 +59,7 @@ public:
                 DocumentWindow::allButtons
         ) {
             setUsingNativeTitleBar(true);
-            setContentOwned(new GridTrackpadComponent(), true);
+            setContentOwned(new UnknownPleasuresComponent(), true);
 
         #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);

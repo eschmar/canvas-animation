@@ -10,11 +10,12 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent : public juce::Component {
+class MainComponent : public juce::AnimatedAppComponent {
 public:
     MainComponent();
     void paint (juce::Graphics&) override;
     void resized() override;
+    void update() override;
 
 private:
     // Your private member variables go here...

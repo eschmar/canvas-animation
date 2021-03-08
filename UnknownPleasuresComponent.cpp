@@ -28,9 +28,8 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     int height = getHeight();
     int width = getWidth();
 
-    for (int i = 0; i < (float) height / verticalOffset; i++) {
+    for (int i = 0; i <= (float) (height - inset) / verticalOffset; i++) {
         float currentY = halfInset + i * verticalOffset;
-        if (currentY > height - halfInset) break;
 
         juce::Path wave;
         g.setColour(juce::Colours::white);

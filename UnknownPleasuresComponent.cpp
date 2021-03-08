@@ -34,9 +34,8 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
 
         float prevLocalY = currentY;
 
-        for (int j = 0; j < (width - halfInset) / horizontalStepOffset; j++) {
+        for (int j = 0; j <= (width - inset) / horizontalStepOffset; j++) {
             float currentX = halfInset + j * horizontalStepOffset;
-            if (currentX > width - halfInset) break;
 
             double distance = euclideanDistance(currentX, currentY, (float) x, (float) y);
             // float distance = std::abs(x - currentX); // Joy Division example

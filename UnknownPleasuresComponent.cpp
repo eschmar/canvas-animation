@@ -15,101 +15,61 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::white);
 
-    // float variance = 240.0f;
-    int verticalOffset = 24;
-    int horizontalStepOffset = 30;
-    float variance = 4.0f * horizontalStepOffset;
+    int verticalOffset = 16;
+    int horizontalStepOffset = 16;
+    float variance = 6.0f * horizontalStepOffset;
+    float waveyOffset = verticalOffset * 0.2f;
     int radius = 96;
 
-    // float posY = y < variance ? variance : y;
     int height = getHeight();
     int width = getWidth();
-
-
     float halfInset = 0.5f * inset;
-
-
 
     for (int i = 0; i < (float) height / verticalOffset; i++) {
         float currentY = halfInset + i * verticalOffset;
         if (currentY > height - halfInset) break;
 
-        // printf(">> currentY: %.2f\n", currentY);
-        // if (currentY < variance * 1.5f) continue;
-
         juce::Path wave;
-        wave.startNewSubPath(juce::Point<float>(halfInset, currentY));
+        g.setColour(juce::Colours::white);
 
-        if (std::abs(y - currentY) > radius) {
-            g.setColour(juce::Colours::white);
-            wave.lineTo(width - halfInset, currentY);
-            g.strokePath(wave, juce::PathStrokeType(2.0f));
+        float prevLocalY = currentY;
 
-            wave.lineTo(width - halfInset, height - halfInset);
-            wave.lineTo(halfInset, height - halfInset);
-            wave.closeSubPath();
-
-            g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-            g.fillPath(wave);
-            continue;
-        }
-        
-
-        g.setColour(juce::Colours::yellow);
-
-
-        for (int j = 1; j < (width - halfInset) / horizontalStepOffset; j++) {
-            float currentX = halfInset + j * horizontalStepOffset + horizontalStepOffset * 0.5f;
-
+        for (int j = 0; j < (width - halfInset) / horizontalStepOffset; j++) {
+            float currentX = halfInset + j * horizontalStepOffset;
+            if (currentX > width - halfInset) break;
 
             float distance = euclideanDistance(currentX, currentY, x, y);
             float ratio = distance / radius;
 
-            float bezierX1 = (j - 1) * horizontalStepOffset + 0.25f * horizontalStepOffset;
-            float bezierX2 = j * horizontalStepOffset - 0.25f * horizontalStepOffset;
+            // what's the current amplitude?
+            float shift = 0.0f;
+            if (ratio < 1.0f) shift = juce::Random::getSystemRandom().nextFloat() * variance * (1.0f - ratio);
 
-            if (ratio > 1) {
-                wave.cubicTo(bezierX1, currentY - 2.0f, bezierX2, currentY + 8.0f, j * horizontalStepOffset, currentY);
+            // attemp sort of wavey line
+            shift += (juce::Random::getSystemRandom().nextFloat() * waveyOffset) - waveyOffset * 0.5f;
+
+            // if this is the first point, start the path
+            if (j == 0) {
+                wave.startNewSubPath(juce::Point<float>(halfInset, currentY - shift));
                 continue;
             }
 
-            double shift = juce::Random::getSystemRandom().nextFloat() * variance;
-            if (juce::Random::getSystemRandom().nextBool()) shift *= -1.0f;
-            wave.cubicTo(bezierX1, currentY, bezierX2, currentY + shift, j * horizontalStepOffset, currentY + shift);
+            // bezier
+            float bezierX1 = currentX - 0.8f * horizontalStepOffset;
+            float bezierX2 = currentX - 0.2f * horizontalStepOffset;
+            // float bezierX = currentX - 0.5f * horizontalStepOffset;
 
-
-
-
+            wave.cubicTo(bezierX1, prevLocalY, bezierX2, currentY - shift, currentX, currentY - shift);
+            prevLocalY = currentY - shift;
         }
 
-        g.strokePath(wave, juce::PathStrokeType(2.0f));
+        g.strokePath(wave, juce::PathStrokeType(3.0f));
         wave.lineTo(width - halfInset, height - halfInset);
         wave.lineTo(halfInset, height - halfInset);
         wave.closeSubPath();
 
         g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         g.fillPath(wave);
-
-
-        /* if (true || std::abs(currentY - posY) > radius || currentY < posY + verticalOffset) {
-            wave.lineTo(width - halfInset, currentY);
-            // wave.lineTo(width - inset * 0.5f, 0);
-            // wave.lineTo(inset * 0.5f, 0);
-            // wave.closeSubPath();
-            g.strokePath(wave, juce::PathStrokeType(2.0f));
-            // canvas.drawPath(wave, strokePaint);
-            // canvas.drawPath(wave, fillPaint);
-            continue;
-        } */
-
-        // juce::Path path;
-        // path.startNewSubPath (juce::Point<float> (10, 10));
-        // path.lineTo (juce::Point<float> (50, 10));
-        // path.lineTo (juce::Point<float> (50, 50));
-        // path.lineTo (juce::Point<float> (10, 50));
-        // path.closeSubPath();
-
-
     }
 }
 

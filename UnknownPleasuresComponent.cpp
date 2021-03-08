@@ -48,10 +48,11 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
         }
 
         g.strokePath(wave, juce::PathStrokeType(3.0f));
-        wave.lineTo(getWidth() - halfInset, getHeight() - halfInset);
-        wave.lineTo(halfInset, getHeight() - halfInset);
-        wave.closeSubPath();
 
+        // fill body below to create illusion of depth
+        wave.lineTo(getWidth() - halfInset, getHeight());
+        wave.lineTo(halfInset, getHeight());
+        wave.closeSubPath();
         g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
         g.fillPath(wave);
     }
@@ -98,9 +99,11 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
 }
 
 void UnknownPleasuresComponent::update() {
+    // TODO: beat syncing
+
+    // basic tweening
     for (int i = 0; i < position.size(); i++) {
         for (int j = 0; j < position[0].size(); j++) {
-            // basic tweening
             position[i][j] += (target[i][j] - position[i][j]) * 0.1f;
         }
     }

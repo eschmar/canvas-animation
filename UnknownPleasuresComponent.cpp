@@ -38,7 +38,9 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
             float currentX = halfInset + j * horizontalStepOffset;
             if (currentX > width - halfInset) break;
 
-            float distance = euclideanDistance(currentX, currentY, x, y);
+            float distance = euclideanDistance(currentX, currentY, (float) x, (float) y);
+            // float distance = std::abs(x - currentX); // Joy Division example
+
             float ratio = distance / radius;
 
             // what's the current amplitude?

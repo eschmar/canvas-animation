@@ -21,6 +21,10 @@ UnknownPleasuresComponent::UnknownPleasuresComponent(
     position.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
     target.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
     computeTarget(true);
+
+    start = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count();
 }
 
 void UnknownPleasuresComponent::paint(juce::Graphics& g) {
@@ -28,7 +32,6 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.setColour(juce::Colours::white);
 
     float halfInset = 0.5f * inset;
-
     for (size_t i = 0; i < position.size(); i++) {
         juce::Path wave;
         g.setColour(juce::Colours::white);
@@ -96,7 +99,17 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
 }
 
 void UnknownPleasuresComponent::update() {
-    // TODO: beat syncing
+    // TODO: replace fake beat syncing with the proper thing
+    uint64_t beatLength = 500;
+    uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()
+    ).count() - 50;
+
+    uint64_t timeSinceBeat = now % beatLength;
+
+    if (timeSinceBeat > beatLength - 25) {
+        computeTarget();
+    }
 
     // basic tweening
     for (size_t i = 0; i < position.size(); i++) {

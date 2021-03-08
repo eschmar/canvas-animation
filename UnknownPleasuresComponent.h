@@ -29,6 +29,7 @@ public:
     void update() override;
 
 private:
+    uint64_t start = 0;
     int verticalOffset, horizontalStepOffset, radius;
     std::vector<std::vector<float>> position, target;
     void computeTarget(bool fastforward = false);

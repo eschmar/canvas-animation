@@ -15,12 +15,57 @@ UnknownPleasuresComponent::UnknownPleasuresComponent(
     verticalOffset = verticalOffset_;
     horizontalStepOffset = horizontalStepOffset_;
     radius = radius_;
+
+    int rowCount = (int) std::floor((float) (getHeight() - inset) / verticalOffset) + 1;
+    int colCount = (getWidth() - inset) / horizontalStepOffset + 1;
+    position.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
+    target.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
+    computeTarget(true);
 }
 
 void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::white);
 
+    float halfInset = 0.5f * inset;
+
+    for (int i = 0; i < position.size(); i++) {
+        juce::Path wave;
+        g.setColour(juce::Colours::white);
+
+        for (int j = 0; j < position[0].size(); j++) {
+            if (j == 0) {
+                wave.startNewSubPath(juce::Point<float>(halfInset, position[i][j]));
+                continue;
+            }
+
+            // bezier
+            float currentX = halfInset + j * horizontalStepOffset;
+            float bezierX1 = currentX - 0.8f * horizontalStepOffset;
+            float bezierX2 = currentX - 0.2f * horizontalStepOffset;
+
+            wave.cubicTo(bezierX1, position[i][j - 1], bezierX2, position[i][j], currentX, position[i][j]);
+        }
+
+        g.strokePath(wave, juce::PathStrokeType(3.0f));
+        wave.lineTo(getWidth() - halfInset, getHeight() - halfInset);
+        wave.lineTo(halfInset, getHeight() - halfInset);
+        wave.closeSubPath();
+
+        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+        g.fillPath(wave);
+    }
+}
+
+void UnknownPleasuresComponent::mouseDrag(const juce::MouseEvent& event) {
+    // printf("X>>> <x,y>=<%d,%d>\n", event.x, event.y);
+    TrackpadComponent::mouseDrag(event);
+    // printf("Y>>> <x',y'>=<%.2f,%.2f>\n", x, y);
+
+    computeTarget();
+}
+
+void UnknownPleasuresComponent::computeTarget(bool fastforward) {
     float variance = 6.0f * horizontalStepOffset;
     float waveyOffset = verticalOffset * 0.2f;
     float halfInset = 0.5f * inset;
@@ -28,15 +73,10 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     int height = getHeight();
     int width = getWidth();
 
-    for (int i = 0; i <= (float) (height - inset) / verticalOffset; i++) {
+    for (int i = 0; i < target.size(); i++) {
         float currentY = halfInset + i * verticalOffset;
 
-        juce::Path wave;
-        g.setColour(juce::Colours::white);
-
-        float prevLocalY = currentY;
-
-        for (int j = 0; j <= (width - inset) / horizontalStepOffset; j++) {
+        for (int j = 0; j < target[0].size(); j++) {
             float currentX = halfInset + j * horizontalStepOffset;
 
             double distance = euclideanDistance(currentX, currentY, (float) x, (float) y);
@@ -51,36 +91,10 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
             // attemp sort of wavey line
             shift += (juce::Random::getSystemRandom().nextFloat() * waveyOffset) - waveyOffset * 0.5f;
 
-            // if this is the first point, start the path
-            if (j == 0) {
-                wave.startNewSubPath(juce::Point<float>(halfInset, currentY - shift));
-                continue;
-            }
-
-            // bezier
-            float bezierX1 = currentX - 0.8f * horizontalStepOffset;
-            float bezierX2 = currentX - 0.2f * horizontalStepOffset;
-            // float bezierX = currentX - 0.5f * horizontalStepOffset;
-
-            wave.cubicTo(bezierX1, prevLocalY, bezierX2, currentY - shift, currentX, currentY - shift);
-            prevLocalY = currentY - shift;
+            target[i][j] = currentY - shift;
+            if (fastforward) position[i][j] = currentY - shift;
         }
-
-        g.strokePath(wave, juce::PathStrokeType(3.0f));
-        wave.lineTo(width - halfInset, height - halfInset);
-        wave.lineTo(halfInset, height - halfInset);
-        wave.closeSubPath();
-
-        g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-        g.fillPath(wave);
     }
-}
-
-void UnknownPleasuresComponent::mouseDrag(const juce::MouseEvent& event) {
-    printf("X>>> <x,y>=<%d,%d>\n", event.x, event.y);
-    TrackpadComponent::mouseDrag(event);
-    printf("Y>>> <x',y'>=<%.2f,%.2f>\n", x, y);
-    // Update `target`
 }
 
 void UnknownPleasuresComponent::update() {

@@ -31,6 +31,8 @@ public:
 private:
     int verticalOffset, horizontalStepOffset, radius;
     std::vector<std::vector<float>> position, target;
+    void computeTarget(bool fastforward = false);
+
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnknownPleasuresComponent)
 };

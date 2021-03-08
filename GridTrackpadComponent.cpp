@@ -29,7 +29,7 @@ void GridTrackpadComponent::paint(juce::Graphics& g) {
                 if (centerY < (inset * 0.5) || centerY > getHeight() - (inset * 0.5)) continue;
             }
 
-            double distance = euclideanDistance(centerX, x, centerY, y);
+            double distance = euclideanDistance(centerX, (float) x, centerY, (float) y);
             double ratio = distance / radius;
 
             int posX = centerX;

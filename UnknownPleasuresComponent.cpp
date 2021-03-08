@@ -29,18 +29,18 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
 
     float halfInset = 0.5f * inset;
 
-    for (int i = 0; i < position.size(); i++) {
+    for (size_t i = 0; i < position.size(); i++) {
         juce::Path wave;
         g.setColour(juce::Colours::white);
 
-        for (int j = 0; j < position[0].size(); j++) {
+        for (size_t j = 0; j < position[0].size(); j++) {
             if (j == 0) {
                 wave.startNewSubPath(juce::Point<float>(halfInset, position[i][j]));
                 continue;
             }
 
             // bezier
-            float currentX = halfInset + j * horizontalStepOffset;
+            float currentX = halfInset + (float) j * horizontalStepOffset;
             float bezierX1 = currentX - 0.8f * horizontalStepOffset;
             float bezierX2 = currentX - 0.2f * horizontalStepOffset;
 
@@ -71,14 +71,11 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
     float waveyOffset = verticalOffset * 0.2f;
     float halfInset = 0.5f * inset;
 
-    int height = getHeight();
-    int width = getWidth();
+    for (size_t i = 0; i < target.size(); i++) {
+        float currentY = halfInset + (float) i * verticalOffset;
 
-    for (int i = 0; i < target.size(); i++) {
-        float currentY = halfInset + i * verticalOffset;
-
-        for (int j = 0; j < target[0].size(); j++) {
-            float currentX = halfInset + j * horizontalStepOffset;
+        for (size_t j = 0; j < target[0].size(); j++) {
+            float currentX = halfInset + (float) j * horizontalStepOffset;
 
             double distance = euclideanDistance(currentX, currentY, (float) x, (float) y);
             // float distance = std::abs(x - currentX); // Joy Division example
@@ -102,8 +99,8 @@ void UnknownPleasuresComponent::update() {
     // TODO: beat syncing
 
     // basic tweening
-    for (int i = 0; i < position.size(); i++) {
-        for (int j = 0; j < position[0].size(); j++) {
+    for (size_t i = 0; i < position.size(); i++) {
+        for (size_t j = 0; j < position[0].size(); j++) {
             position[i][j] += (target[i][j] - position[i][j]) * 0.1f;
         }
     }

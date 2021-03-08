@@ -23,6 +23,7 @@ protected:
     int size, inset, fps;
     std::tuple<float, float> calculateRelativePosition(int pixelX, int pixelY);
     std::tuple<int, int> calculatePixelPosition(float relX, float relY);
+    float euclideanDistance(float x1, float y1, float x2, float y2);
 
 private:
     // Your private member variables go here...

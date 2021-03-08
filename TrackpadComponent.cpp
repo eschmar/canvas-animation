@@ -18,12 +18,10 @@ void TrackpadComponent::paint(juce::Graphics& g) {
 }
 
 void TrackpadComponent::mouseDrag(const juce::MouseEvent& event) {
-    // printf(">>> <x,y>=<%d,%d>\n", event.x, event.y);
     std::tuple<float, float> relPos = calculateRelativePosition(event.x, event.y);
     std::tuple<float, float> absPos = calculatePixelPosition(std::get<0>(relPos), std::get<1>(relPos));
     x = std::get<0>(absPos);
     y = std::get<1>(absPos);
-    // printf(">>> <x',y'>=<%.2f,%.2f>\n", x, y);
 }
 
 /**

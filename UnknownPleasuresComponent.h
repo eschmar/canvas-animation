@@ -14,13 +14,23 @@
 class UnknownPleasuresComponent : public TrackpadComponent {
 public:
     UnknownPleasuresComponent() : UnknownPleasuresComponent(512) {}
-    UnknownPleasuresComponent(int size_, int inset_ = 96, int fps_ = 60);
+    UnknownPleasuresComponent(
+        int size_,
+        int inset_ = 96,
+        int fps_ = 60,
+        int verticalOffset_ = 16,
+        int horizontalStepOffset_ = 16,
+        int radius_ = 96
+    );
+
     void paint (juce::Graphics&) override;
+    void mouseDrag(const juce::MouseEvent& event) override;
     void resized() override;
     void update() override;
 
 private:
-    // float radius, gridSize, maxPointSize;
+    int verticalOffset, horizontalStepOffset, radius;
+    std::vector<std::vector<float>> position, target;
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnknownPleasuresComponent)
 };

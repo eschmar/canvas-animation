@@ -3,23 +3,29 @@
 UnknownPleasuresComponent::UnknownPleasuresComponent(
     int size_,
     int inset_,
-    int fps_
+    int fps_,
+    int verticalOffset_,
+    int horizontalStepOffset_,
+    int radius_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
     x = getWidth() * 0.5f;
     y = getHeight() * 0.5f;
+    verticalOffset = verticalOffset_;
+    horizontalStepOffset = horizontalStepOffset_;
+    radius = radius_;
 }
 
 void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::white);
 
-    int verticalOffset = 16;
-    int horizontalStepOffset = 16;
+    // int verticalOffset = 16;
+    // int horizontalStepOffset = 16;
     float variance = 6.0f * horizontalStepOffset;
     float waveyOffset = verticalOffset * 0.2f;
-    int radius = 96;
+    // int radius = 96;
 
     int height = getHeight();
     int width = getWidth();
@@ -74,7 +80,12 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     }
 }
 
-// TODO: create a callback from mouseDrag to update `target`
+void UnknownPleasuresComponent::mouseDrag(const juce::MouseEvent& event) {
+    printf("X>>> <x,y>=<%d,%d>\n", event.x, event.y);
+    TrackpadComponent::mouseDrag(event);
+    printf("Y>>> <x',y'>=<%.2f,%.2f>\n", x, y);
+    // Update `target`
+}
 
 void UnknownPleasuresComponent::update() {
     // This function is called at the frequency specified by the setFramesPerSecond() call

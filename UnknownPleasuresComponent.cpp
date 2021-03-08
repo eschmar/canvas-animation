@@ -21,15 +21,12 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
     g.setColour(juce::Colours::white);
 
-    // int verticalOffset = 16;
-    // int horizontalStepOffset = 16;
     float variance = 6.0f * horizontalStepOffset;
     float waveyOffset = verticalOffset * 0.2f;
-    // int radius = 96;
+    float halfInset = 0.5f * inset;
 
     int height = getHeight();
     int width = getWidth();
-    float halfInset = 0.5f * inset;
 
     for (int i = 0; i < (float) height / verticalOffset; i++) {
         float currentY = halfInset + i * verticalOffset;

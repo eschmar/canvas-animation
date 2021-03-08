@@ -98,10 +98,12 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
 }
 
 void UnknownPleasuresComponent::update() {
-    // This function is called at the frequency specified by the setFramesPerSecond() call
-    // in the constructor. You can use it to update counters, animate values, etc.
-
-    // move `current` towards `target`
+    for (int i = 0; i < position.size(); i++) {
+        for (int j = 0; j < position[0].size(); j++) {
+            // basic tweening
+            position[i][j] += (target[i][j] - position[i][j]) * 0.1f;
+        }
+    }
 }
 
 void UnknownPleasuresComponent::resized() {

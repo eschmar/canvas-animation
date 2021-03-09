@@ -26,6 +26,7 @@ public:
     void update() override;
 
 private:
+    float relX, relY;
     std::vector<std::vector<float>> position, target;
     void computeTarget(bool fastforward = false);
 

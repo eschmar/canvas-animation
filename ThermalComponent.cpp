@@ -11,7 +11,7 @@ ThermalComponent::ThermalComponent(
     y = getHeight() * 0.5f;
     relX = 0.5f;
     relY = 0.5f;
-    wobbler = M_PI;
+    wobbler = (float) M_PI;
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
@@ -29,14 +29,14 @@ void ThermalComponent::paint(juce::Graphics& g) {
     g.drawEllipse((float) x - radius, (float) y - radius, radius * 2, radius * 2, 3);
 
     // Blobs
-    drawBlob(size * 0.5f, size * 0.5f, 124.0f, juce::Colours::red, g);
-    drawBlob(size * 0.5f, size * 0.5f, 106.0f, juce::Colours::blue, g);
-    drawBlob(size * 0.5f, size * 0.5f, 64.0f, juce::Colours::grey, g);
+    drawBlob((float) x, (float) y, 124.0f, juce::Colours::red, g);
+    drawBlob((float) x, (float) y, 106.0f, juce::Colours::blue, g);
+    drawBlob((float) x, (float) y, 64.0f, juce::Colours::grey, g);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {
-    float offsetX = 20.0f * std::sin(wobbler);
-    float offsetY = 15.0f * std::cos(wobbler * 2);
+    float offsetX = centerX + 20.0f * std::sin(wobbler);
+    float offsetY = centerY + 15.0f * std::cos(wobbler * 2);
 
     float circ = 4.0f * (std::sqrt(2.0f) - 1.0f) / 3.0f;
     float c = 0.0f;
@@ -44,45 +44,45 @@ void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce
     juce::Path wave;
 
     // top right
-    c = circ + (0.2 * std::sin(wobbler));
-    wave.startNewSubPath(juce::Point<float>(centerX + offsetX + 0, centerY + offsetY - radius));
+    c = circ + (0.2f * std::sin(wobbler));
+    wave.startNewSubPath(juce::Point<float>(offsetX + 0, offsetY - radius));
     wave.cubicTo(
-        centerX + offsetX + c * radius, centerY + offsetY - radius,
-        centerX + offsetX + radius, centerY + offsetY - c * radius,
-        centerX + offsetX + radius, centerY + offsetY + 0
+        offsetX + c * radius, offsetY - radius,
+        offsetX + radius, offsetY - c * radius,
+        offsetX + radius, offsetY + 0
     );
 
     // g.setColour(juce::Colours::white);
     // g.strokePath(wave, juce::PathStrokeType(12.0f));
 
     // bottom right
-    c = circ + (0.2 * std::cos(wobbler));
+    c = circ + (0.2f * std::cos(wobbler));
     wave.cubicTo(
-        centerX + offsetX + radius, centerY + offsetY + c * radius,
-        centerX + offsetX + c * radius, centerY + offsetY + radius,
-        centerX + offsetX + 0, centerY + offsetY + radius
+        offsetX + radius, offsetY + c * radius,
+        offsetX + c * radius, offsetY + radius,
+        offsetX + 0, offsetY + radius
     );
 
     // g.setColour(juce::Colours::blue);
     // g.strokePath(wave, juce::PathStrokeType(8.0f));
 
     // bottom left
-    c = circ + (0.2 * std::sin(wobbler * 2));
+    c = circ + (0.2f * std::sin(wobbler * 2));
     wave.cubicTo(
-        centerX + offsetX - c * radius, centerY + offsetY + radius,
-        centerX + offsetX - radius, centerY + offsetY + c * radius,
-        centerX + offsetX - radius, centerY + offsetY + 0
+        offsetX - c * radius, offsetY + radius,
+        offsetX - radius, offsetY + c * radius,
+        offsetX - radius, offsetY + 0
     );
 
     // g.setColour(juce::Colours::green);
     // g.strokePath(wave, juce::PathStrokeType(4.0f));
 
     // top left
-    c = circ + (0.2 * std::cos(wobbler + 1));
+    c = circ + (0.2f * std::cos(wobbler + 1));
     wave.cubicTo(
-        centerX + offsetX - radius, centerY + offsetY - c * radius,
-        centerX + offsetX - c * radius, centerY + offsetY - radius,
-        centerX + offsetX + 0, centerY + offsetY - radius
+        offsetX - radius, offsetY - c * radius,
+        offsetX - c * radius, offsetY - radius,
+        offsetX + 0, offsetY - radius
     );
 
     // g.setColour(juce::Colours::red);
@@ -91,7 +91,7 @@ void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce
     g.setColour(colour);
     g.fillPath(wave);
 
-    wobbler = std::fmod(wobbler + 0.001, M_PI * 2.0f);
+    wobbler = (float) std::fmod(wobbler + 0.01, M_PI * 2.0f);
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {

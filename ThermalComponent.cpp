@@ -48,6 +48,7 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     }
 
     // map coordinates to unit circle
+    // http://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
     float u = (float) (x - center) / radius;
     float v = (float) (y - center) / radius;
 

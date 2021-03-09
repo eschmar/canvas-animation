@@ -48,8 +48,8 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     }
 
     // map coordinates to unit circle
-    float u = (x - center) / radius;
-    float v = (y - center) / radius;
+    float u = (float) (x - center) / radius;
+    float v = (float) (y - center) / radius;
 
     // convert circle to square
     double u2 = u * u;
@@ -63,11 +63,11 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     double termy2 = subtermy - v * twosqrt2;
 
     // x = ½ √( 2 + 2u√2 + u² - v² ) - ½ √( 2 - 2u√2 + u² - v² )
-    float squareX = 0.5 * std::sqrt(termx1) - 0.5 * std::sqrt(termx2);
+    float squareX = (float) (0.5 * std::sqrt(termx1) - 0.5 * std::sqrt(termx2));
     relX = (squareX + 1.0f) * 0.5f;
 
     // y = ½ √( 2 + 2v√2 - u² + v² ) - ½ √( 2 - 2v√2 - u² + v² )
-    float squareY = 0.5 * std::sqrt(termy1) - 0.5 * std::sqrt(termy2);
+    float squareY = (float) (0.5 * std::sqrt(termy1) - 0.5 * std::sqrt(termy2));
     relY = (squareY + 1.0f) * 0.5f;
 
     computeTarget();

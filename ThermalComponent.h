@@ -27,7 +27,7 @@ public:
 
 private:
     float relX, relY, wobbler;
-    std::vector<std::vector<float>> position, target;
+    std::vector<float> coordinateX, coordinateY;
     void computeTarget(bool fastforward = false);
     void drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g);
 

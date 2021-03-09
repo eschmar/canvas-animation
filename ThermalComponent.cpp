@@ -7,8 +7,15 @@ ThermalComponent::ThermalComponent(
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
-    x = getWidth() * 0.65f;
-    y = getHeight() * 0.65f;
+
+    coordinateX.resize(2);
+    coordinateX[0] = getWidth() * 0.65f;
+    coordinateX[1] = getWidth() * 0.65f;
+
+    coordinateY.resize(2);
+    coordinateY[0] = getHeight() * 0.65f;
+    coordinateY[1] = getHeight() * 0.65f;
+
     wobbler = (float) M_PI;
 }
 
@@ -26,12 +33,20 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     int iterations = (int) ((getWidth() - inset - minBlobSize) / blobStepSize);
 
+    float halfSize = size * 0.5f;
+    float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
+    float ratio = distance / ((size - inset) * 0.5f);
+
     while (radius > minBlobSize) {
-        // Round((R1*Percent + R2*(100-Percent))/100.0)
+        // Add perspective to blobs by offsetting the position slightly
         float percent = (float) i++ / iterations;
+        float persp = blobStepSize * (1.0f - percent) * ratio;
+        float perspX = ((coordinateX[0] - halfSize) / distance) * (distance - persp * i);
+        float perspY = ((coordinateY[0] - halfSize) / distance) * (distance - persp * i);
+
         drawBlob(
-            (float) x, // TODO: add perspective
-            (float) y, // TODO: add perspective
+            (float) halfSize + perspX,
+            (float) halfSize + perspY,
             radius,
             juce::Colour(
                 (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
@@ -46,7 +61,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
     }
 
     // Draw smallest size blob in base color
-    drawBlob((float) x, (float) y, minBlobSize, baseColor, g);
+    drawBlob(coordinateX[0], coordinateY[0], minBlobSize, baseColor, g);
 
     // Create illusion of a hole
     juce::Path hole;
@@ -61,12 +76,12 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // Draw a lil ring around the whole
     g.setColour(juce::Colour(r1, g1, b1));
     float ringOffset = 8;
-    g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 4.0f);
+    g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 2.0f);
 
     // Draggable circle
-    float cursorRadius = 16;
+    float cursorRadius = 4;
     g.setColour(juce::Colours::yellow);
-    g.drawEllipse((float) x - cursorRadius, (float) y - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
+    g.drawEllipse(coordinateX[0] - cursorRadius, coordinateY[0] - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {
@@ -126,7 +141,7 @@ void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce
     g.setColour(colour);
     g.fillPath(wave);
 
-    wobbler = (float) std::fmod(wobbler + 0.005, M_PI * 2.0f);
+    wobbler = (float) std::fmod(wobbler + 0.001, M_PI * 2.0f);
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
@@ -140,12 +155,12 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
         float deltaY = event.y - center;
 
         float length = (float) std::sqrt(std::pow(deltaX, 2.0) + std::pow(deltaY, 2.0));
-        x = center + (deltaX / length) * radius;
-        y = center + (deltaY / length) * radius;
+        coordinateX[1] = center + (deltaX / length) * radius;
+        coordinateY[1] = center + (deltaY / length) * radius;
 
     } else {
-        x = event.x;
-        y = event.y;
+        coordinateX[1] = event.x;
+        coordinateY[1] = event.y;
     }
 
     // map coordinates to unit circle
@@ -180,7 +195,9 @@ void ThermalComponent::computeTarget(bool fastforward) {
 }
 
 void ThermalComponent::update() {
-    // Todo.
+    // basic tweening
+    coordinateX[0] += (coordinateX[1] - coordinateX[0]) * 0.1f;
+    coordinateY[0] += (coordinateY[1] - coordinateY[0]) * 0.1f;
 }
 
 void ThermalComponent::resized() {

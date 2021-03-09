@@ -26,9 +26,10 @@ public:
     void update() override;
 
 private:
-    float relX, relY;
+    float relX, relY, wobbler;
     std::vector<std::vector<float>> position, target;
     void computeTarget(bool fastforward = false);
+    void drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g);
 
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThermalComponent)

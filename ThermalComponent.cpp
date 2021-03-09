@@ -24,19 +24,19 @@ void ThermalComponent::paint(juce::Graphics& g) {
     u_int8_t r1 = 255, g1 = 155, b1 = 0;
     u_int8_t r2 = 194, g2 = 32, b2 = 19;
 
-    int iterations = (getWidth() - inset - minBlobSize) / blobStepSize;
+    int iterations = (int) ((getWidth() - inset - minBlobSize) / blobStepSize);
 
     while (radius > minBlobSize) {
         // Round((R1*Percent + R2*(100-Percent))/100.0)
         float percent = (float) i++ / iterations;
         drawBlob(
-            (float) x,
-            (float) y,
+            (float) x, // TODO: add perspective
+            (float) y, // TODO: add perspective
             radius,
             juce::Colour(
-                r1 * percent + r2 * (1.0f - percent),
-                g1 * percent + g2 * (1.0f - percent),
-                b1 * percent + b2 * (1.0f - percent)
+                (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
+                (u_int8_t) (g1 * percent + g2 * (1.0f - percent)),
+                (u_int8_t) (b1 * percent + b2 * (1.0f - percent))
             ),
             g
         );
@@ -126,7 +126,7 @@ void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce
     g.setColour(colour);
     g.fillPath(wave);
 
-    wobbler = (float) std::fmod(wobbler + 0.01, M_PI * 2.0f);
+    wobbler = (float) std::fmod(wobbler + 0.005, M_PI * 2.0f);
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {

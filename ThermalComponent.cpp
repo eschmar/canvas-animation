@@ -69,19 +69,26 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
     hole.setUsingNonZeroWinding(false);
+
+    float ringOffset = 8;
+    float ringStrokeWidth = 2;
+
+    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
+    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
     hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
+
     g.setColour(baseColor);
     g.fillPath(hole);
 
     // Draw a lil ring around the whole
-    g.setColour(juce::Colour(r1, g1, b1));
-    float ringOffset = 8;
-    g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 2.0f);
+    // g.setColour(juce::Colour(r1, g1, b1));
+    // float ringOffset = 8;
+    // g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 2.0f);
 
     // Draggable circle
-    float cursorRadius = 4;
-    g.setColour(juce::Colours::yellow);
-    g.drawEllipse(coordinateX[0] - cursorRadius, coordinateY[0] - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
+    // float cursorRadius = 4;
+    // g.setColour(juce::Colours::yellow);
+    // g.drawEllipse(coordinateX[0] - cursorRadius, coordinateY[0] - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

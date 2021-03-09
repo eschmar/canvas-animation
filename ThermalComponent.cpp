@@ -15,26 +15,33 @@ ThermalComponent::ThermalComponent(
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    // Draggable circle
-    float cursorRadius = 16;
-    g.setColour(juce::Colours::yellow);
-    g.drawEllipse((float) x - cursorRadius, (float) y - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
-
     // Blobs
     float blobStepSize = 32.0f;
+    float minBlobSize = 38.0f;
     float radius = getWidth() - inset;
     int i = 0;
 
-    while (radius > 48.0f) {
+    u_int8_t r1 = 50, g1 = 62, b1 = 68;
+    u_int8_t r2 = 255, g2 = 162, b2 = 18;
+    int iterations = (getWidth() - inset - minBlobSize) / blobStepSize;
+
+    while (radius > minBlobSize) {
+        // Round((R1*Percent + R2*(100-Percent))/100.0)
+        float percent = (float) i++ / iterations;
         drawBlob(
             (float) x,
             (float) y,
             radius,
-            ++i % 2 == 0 ? juce::Colours::grey : juce::Colours::blue,
+            juce::Colour(
+                r1 * percent + r2 * (1.0f - percent),
+                g1 * percent + g2 * (1.0f - percent),
+                b1 * percent + b2 * (1.0f - percent)
+            ),
             g
         );
 
         radius -= blobStepSize;
+        // blobStepSize *= 0.95f;
     }
 
     // Create illusion of a hole
@@ -48,8 +55,14 @@ void ThermalComponent::paint(juce::Graphics& g) {
     g.fillPath(hole);
 
     // Draw a lil ring around the whole
-    g.setColour(juce::Colour(37, 48, 54));
-    g.drawEllipse(juce::Rectangle<float>(halfInset - 6, halfInset - 6, getWidth() - inset + 12, getHeight() - inset + 12), 4.0f);
+    g.setColour(juce::Colour(r2, g2, b2));
+    float ringOffset = 8;
+    g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 4.0f);
+
+    // Draggable circle
+    float cursorRadius = 16;
+    g.setColour(juce::Colours::yellow);
+    g.drawEllipse((float) x - cursorRadius, (float) y - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

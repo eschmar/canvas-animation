@@ -7,22 +7,23 @@ ThermalComponent::ThermalComponent(
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
-    x = getWidth() * 0.5f;
-    y = getHeight() * 0.5f;
-    relX = 0.5f;
-    relY = 0.5f;
+    x = getWidth() * 0.65f;
+    y = getHeight() * 0.65f;
     wobbler = (float) M_PI;
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
+    juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+
     // Blobs
     float blobStepSize = 32.0f;
     float minBlobSize = 38.0f;
     float radius = getWidth() - inset;
     int i = 0;
 
-    u_int8_t r1 = 50, g1 = 62, b1 = 68;
-    u_int8_t r2 = 255, g2 = 162, b2 = 18;
+    u_int8_t r1 = 255, g1 = 155, b1 = 0;
+    u_int8_t r2 = 194, g2 = 32, b2 = 19;
+
     int iterations = (getWidth() - inset - minBlobSize) / blobStepSize;
 
     while (radius > minBlobSize) {
@@ -44,6 +45,9 @@ void ThermalComponent::paint(juce::Graphics& g) {
         // blobStepSize *= 0.95f;
     }
 
+    // Draw smallest size blob in base color
+    drawBlob((float) x, (float) y, minBlobSize, baseColor, g);
+
     // Create illusion of a hole
     juce::Path hole;
     float halfInset = inset * 0.5f;
@@ -51,11 +55,11 @@ void ThermalComponent::paint(juce::Graphics& g) {
     hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
     hole.setUsingNonZeroWinding(false);
     hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
-    g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    g.setColour(baseColor);
     g.fillPath(hole);
 
     // Draw a lil ring around the whole
-    g.setColour(juce::Colour(r2, g2, b2));
+    g.setColour(juce::Colour(r1, g1, b1));
     float ringOffset = 8;
     g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 4.0f);
 

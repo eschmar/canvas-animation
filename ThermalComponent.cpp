@@ -15,21 +15,12 @@ ThermalComponent::ThermalComponent(
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    g.fillAll (getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
-
-    // Background circle
-    float halfInset = inset * 0.5f;
-    g.setColour(juce::Colour(37, 48, 54));
-    g.fillEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
-    g.drawEllipse(juce::Rectangle<float>(halfInset - 6, halfInset - 6, getWidth() - inset + 12, getHeight() - inset + 12), 4.0f);
-
     // Draggable circle
     float cursorRadius = 16;
     g.setColour(juce::Colours::yellow);
     g.drawEllipse((float) x - cursorRadius, (float) y - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
 
     // Blobs
-
     float blobStepSize = 32.0f;
     float radius = getWidth() - inset;
     int i = 0;
@@ -45,6 +36,20 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
         radius -= blobStepSize;
     }
+
+    // Create illusion of a hole
+    juce::Path hole;
+    float halfInset = inset * 0.5f;
+
+    hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
+    hole.setUsingNonZeroWinding(false);
+    hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
+    g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    g.fillPath(hole);
+
+    // Draw a lil ring around the whole
+    g.setColour(juce::Colour(37, 48, 54));
+    g.drawEllipse(juce::Rectangle<float>(halfInset - 6, halfInset - 6, getWidth() - inset + 12, getHeight() - inset + 12), 4.0f);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

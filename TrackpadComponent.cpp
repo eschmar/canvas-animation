@@ -11,6 +11,10 @@ void TrackpadComponent::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
+    // Show active area bounds
+    g.setColour(juce::Colour(37, 48, 54));
+    g.fillRoundedRectangle(juce::Rectangle<float>(inset * 0.5f, inset * 0.5f, getWidth() - inset, getHeight() - inset), 8.0);
+
     // Draggable circle
     float radius = 16;
     g.setColour(juce::Colours::yellow);

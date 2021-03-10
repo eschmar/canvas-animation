@@ -16,7 +16,7 @@ GridTrackpadComponent::GridTrackpadComponent(
 
 void GridTrackpadComponent::paint(juce::Graphics& g) {
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-    g.setColour(juce::Colours::yellow);
+    g.setColour(juce::Colours::white);
 
     for (int i = 0; i <= (float) getHeight() / gridSize; i++) {
         int centerY = (int) (i * gridSize);
@@ -29,15 +29,15 @@ void GridTrackpadComponent::paint(juce::Graphics& g) {
                 if (centerY < (inset * 0.5) || centerY > getHeight() - (inset * 0.5)) continue;
             }
 
-            double distance = euclideanDistance(centerX, (float) x, centerY, (float) y);
+            double distance = euclideanDistance(centerX, centerY, (float) x, (float) y);
             double ratio = distance / radius;
 
             int posX = centerX;
             int posY = centerY;
 
             if (ratio <= 1) {
-                posX = posX - ((int) ((x - posX) * (1 - ratio) * 0.5));
-                posY = posY - ((int) ((y - posY) * (1 - ratio) * 0.5));
+                posX = posX - ((int) ((x - posX) * (1.0 - ratio) * 0.5));
+                posY = posY - ((int) ((y - posY) * (1.0 - ratio) * 0.5));
             }
 
             // Scale individual point size between 2 and maxPointSize to introduce scaling effect.

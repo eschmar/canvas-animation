@@ -51,8 +51,6 @@ void ThermalComponent::paint(juce::Graphics& g) {
         float perspX = ((coordinateX[0] - halfSize) / distance) * (distance - persp * i);
         float perspY = ((coordinateY[0] - halfSize) / distance) * (distance - persp * i);
 
-        printf(">> percent = %.2f\n", percent);
-
         drawBlob(
             (float) halfSize + perspX,
             (float) halfSize + perspY,

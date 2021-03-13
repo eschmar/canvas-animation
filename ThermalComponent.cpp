@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
-    setFramesPerSecond (1);
+    setFramesPerSecond(1);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -29,12 +29,12 @@ ThermalComponent::ThermalComponent(
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
-    u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
+    // u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
+    // u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
 
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    drawBlob2(coordinateX[1], coordinateY[1], 96.0f, gradientTo, g);
+    drawBlob2(coordinateX[1], coordinateY[1], 196.0f, gradientTo, g);
 
     // float halfSize = size * 0.5f;
     // float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
@@ -97,32 +97,67 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
 void ThermalComponent::drawBlob2(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {
     g.setColour(gradientFrom);
-    g.drawEllipse(juce::Rectangle<float>(centerX - radius, centerY - radius, radius * 2.0f, radius * 2.0f), 3.0f);
+    g.drawEllipse(juce::Rectangle<float>(centerX - radius, centerY - radius, radius * 2.0f, radius * 2.0f), 1.0f);
 
     // evenly distribute points around circle
     size_t totalPoints = 6;
-    float theta = M_PI * 2.0 / totalPoints;
+    float theta = (float) (M_PI * 2.0 / totalPoints);
     g.setColour(juce::Colours::white);
 
     juce::Path blob;
     float pr = 3;
+    float perpDist = 128.0;
+    float bezierX1 = 0.0f, bezierY1 = 0.0f;
+    float prevX = 0.0f, prevY = 0.0f;
 
+    // float prevX, prevY, prevVectorX, prevVectorY;
     for (size_t i = 0; i < totalPoints; i++) {
-        float pointX = centerX + radius * std::cos(theta * i);
-        float pointY = centerY + radius * std::sin(theta * i);
+        float vectorX = std::cos(theta * i);
+        float vectorY = std::sin(theta * i);
+        float pointX = centerX + radius * vectorX;
+        float pointY = centerY + radius * vectorY;
 
         // show point coordinates
         g.setColour(juce::Colours::white);
         g.fillEllipse(juce::Rectangle<float>(pointX - pr, pointY - pr, pr * 2.0f, pr * 2.0f));
 
+        float perpX = vectorY;
+        float perpY = -1.0f * vectorX;
+
         if (i == 0) {
             blob.startNewSubPath(juce::Point<float>(pointX, pointY));
         } else {
-            blob.lineTo(pointX, pointY);
+            float bezierX2, bezierY2;
+
+            // calculate bezier points for the target point.
+            bezierX2 = pointX + perpX * perpDist;
+            bezierY2 = pointY + perpY * perpDist;
+
+            // draw bezier curve points for the second point
+            if (i == 1) {
+                g.setColour(juce::Colours::cyan);
+                g.fillEllipse(juce::Rectangle<float>(bezierX1 - pr, bezierY1 - pr, pr * 2.0f, pr * 2.0f));
+                g.drawLine(juce::Line<float>(prevX, prevY, bezierX1, bezierY1));
+
+                g.setColour(juce::Colours::teal);
+                g.fillEllipse(juce::Rectangle<float>(bezierX2 - pr, bezierY2 - pr, pr * 2.0f, pr * 2.0f));
+                g.drawLine(juce::Line<float>(pointX, pointY, bezierX2, bezierY2));
+            }
+
+            // blob.lineTo(pointX, pointY);
+            blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, pointX, pointY);
         }
+
+        bezierX1 = pointX - perpX * perpDist;
+        bezierY1 = pointY - perpY * perpDist;
+
+        prevX = pointX;
+        prevY = pointY;
     }
 
-    blob.closeSubPath();
+    // by the unit circle it's trivial to determine the bezier points for the starting condition.
+    blob.cubicTo(bezierX1, bezierY1, centerX + radius, centerY - perpDist, centerX + radius, centerY);
+
     g.setColour(gradientTo);
     g.strokePath(blob, juce::PathStrokeType(2.0f));
 }

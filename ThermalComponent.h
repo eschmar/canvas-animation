@@ -17,7 +17,15 @@ public:
     ThermalComponent(
         int size_,
         int inset_ = 96,
-        int fps_ = 60
+        int fps_ = 60,
+        float stepSize_ = 36.0,
+        float blobSize_ = 38.0,
+        juce::Colour gradientFrom_ = juce::Colour(255, 155, 0),
+        juce::Colour gradientTo_ = juce::Colour(194, 32, 19)
+
+        // blue
+        // juce::Colour gradientFrom_ = juce::Colour(0, 163, 255),
+        // juce::Colour gradientTo_ = juce::Colour(0, 55, 85)
     );
 
     void paint (juce::Graphics&) override;
@@ -26,7 +34,8 @@ public:
     void update() override;
 
 private:
-    float relX, relY, wobbler;
+    float relX, relY, wobbler, stepSize, blobSize;
+    juce::Colour gradientFrom, gradientTo;
     std::vector<float> coordinateX, coordinateY;
     void computeTarget(bool fastforward = false);
     void drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g);

@@ -3,10 +3,19 @@
 ThermalComponent::ThermalComponent(
     int size_,
     int inset_,
-    int fps_
+    int fps_,
+    float stepSize_,
+    float blobSize_,
+    juce::Colour gradientFrom_,
+    juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
+
+    stepSize = stepSize_;
+    blobSize = blobSize_;
+    gradientFrom = gradientFrom_;
+    gradientTo = gradientTo_;
 
     coordinateX.resize(2);
     coordinateX[0] = getWidth() * 0.65f;
@@ -20,29 +29,29 @@ ThermalComponent::ThermalComponent(
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
-
-    // Blobs
-    float blobStepSize = 32.0f;
-    float minBlobSize = 38.0f;
-    float radius = getWidth() - inset;
-    int i = 0;
-
-    u_int8_t r1 = 255, g1 = 155, b1 = 0;
-    u_int8_t r2 = 194, g2 = 32, b2 = 19;
-
-    int iterations = (int) ((getWidth() - inset - minBlobSize) / blobStepSize);
+    u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
+    u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
 
     float halfSize = size * 0.5f;
     float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
     float ratio = distance / ((size - inset) * 0.5f);
 
-    while (radius > minBlobSize) {
+    // Fill canvas in case blobs don't cover everything
+    g.fillAll(gradientTo);
+
+    // Draw stacked blobs, start with a radius that will fill the active zone
+    size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
+
+    for (size_t i = 0; i < blobCount; i++) {
+        float percent = (float) i / blobCount;
+        float radius = blobSize + (blobCount - i) * stepSize;
+
         // Add perspective to blobs by offsetting the position slightly
-        float percent = (float) i++ / iterations;
-        float persp = blobStepSize * (1.0f - percent) * ratio;
+        float persp = stepSize * (1.0f - percent) * ratio * 0.8f;
         float perspX = ((coordinateX[0] - halfSize) / distance) * (distance - persp * i);
         float perspY = ((coordinateY[0] - halfSize) / distance) * (distance - persp * i);
+
+        printf(">> percent = %.2f\n", percent);
 
         drawBlob(
             (float) halfSize + perspX,
@@ -55,13 +64,11 @@ void ThermalComponent::paint(juce::Graphics& g) {
             ),
             g
         );
-
-        radius -= blobStepSize;
-        // blobStepSize *= 0.95f;
     }
 
     // Draw smallest size blob in base color
-    drawBlob(coordinateX[0], coordinateY[0], minBlobSize, baseColor, g);
+    juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    drawBlob(coordinateX[0], coordinateY[0], blobSize, baseColor, g);
 
     // Create illusion of a hole
     juce::Path hole;
@@ -79,16 +86,6 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     g.setColour(baseColor);
     g.fillPath(hole);
-
-    // Draw a lil ring around the whole
-    // g.setColour(juce::Colour(r1, g1, b1));
-    // float ringOffset = 8;
-    // g.drawEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2), 2.0f);
-
-    // Draggable circle
-    // float cursorRadius = 4;
-    // g.setColour(juce::Colours::yellow);
-    // g.drawEllipse(coordinateX[0] - cursorRadius, coordinateY[0] - cursorRadius, cursorRadius * 2, cursorRadius * 2, 3);
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

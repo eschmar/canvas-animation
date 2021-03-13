@@ -34,10 +34,13 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    juce::Path blobbed = generateBlob(g, coordinateX[1], coordinateY[1], 156.0f, 6, 1.1f);
-
+    juce::Path triangle = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 3, 1.1f);
     g.setColour(juce::Colour(0x33aa1100));
-    g.fillPath(blobbed);
+    g.fillPath(triangle);
+
+    juce::Path hexagon = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 6, 1.1f);
+    g.setColour(juce::Colour(0x330011aa));
+    g.fillPath(hexagon);
 
     // // Create illusion of a hole
     // juce::Path hole;

@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
-    setFramesPerSecond (fps_);
+    setFramesPerSecond (1);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -18,12 +18,12 @@ ThermalComponent::ThermalComponent(
     gradientTo = gradientTo_;
 
     coordinateX.resize(2);
-    coordinateX[0] = getWidth() * 0.65f;
-    coordinateX[1] = getWidth() * 0.65f;
+    coordinateX[0] = getWidth() * 0.5f;
+    coordinateX[1] = getWidth() * 0.5f;
 
     coordinateY.resize(2);
-    coordinateY[0] = getHeight() * 0.65f;
-    coordinateY[1] = getHeight() * 0.65f;
+    coordinateY[0] = getHeight() * 0.5f;
+    coordinateY[1] = getHeight() * 0.5f;
 
     wobbler = (float) M_PI;
 }
@@ -32,63 +32,99 @@ void ThermalComponent::paint(juce::Graphics& g) {
     u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
     u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
 
-    float halfSize = size * 0.5f;
-    float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
-    float ratio = distance / ((size - inset) * 0.5f);
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    // Fill canvas in case blobs don't cover everything
-    g.fillAll(gradientTo);
+    drawBlob2(coordinateX[1], coordinateY[1], 96.0f, gradientTo, g);
 
-    // Draw stacked blobs, start with a radius that will fill the active zone
-    size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
+    // float halfSize = size * 0.5f;
+    // float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
+    // float ratio = distance / ((size - inset) * 0.5f);
 
-    for (size_t i = 0; i < blobCount; i++) {
-        float percent = (float) i / blobCount;
-        float radius = blobSize + (blobCount - i) * stepSize;
+    // // Fill canvas in case blobs don't cover everything
+    // g.fillAll(gradientTo);
 
-        // Add perspective to blobs by offsetting the position slightly
-        float persp = stepSize * (1.0f - percent) * ratio * 0.8f;
-        float perspX = ((coordinateX[0] - halfSize) / distance) * (distance - persp * i);
-        float perspY = ((coordinateY[0] - halfSize) / distance) * (distance - persp * i);
+    // // Draw stacked blobs, start with a radius that will fill the active zone
+    // size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
 
-        drawBlob(
-            (float) halfSize + perspX,
-            (float) halfSize + perspY,
-            radius,
-            juce::Colour(
-                (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
-                (u_int8_t) (g1 * percent + g2 * (1.0f - percent)),
-                (u_int8_t) (b1 * percent + b2 * (1.0f - percent))
-            ),
-            g
-        );
-    }
+    // for (size_t i = 0; i < blobCount; i++) {
+    //     float percent = (float) i / blobCount;
+    //     float radius = blobSize + (blobCount - i) * stepSize;
 
-    // Draw smallest size blob in base color
-    juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
-    drawBlob(coordinateX[0], coordinateY[0], blobSize, baseColor, g);
+    //     // Add perspective to blobs by offsetting the position slightly
+    //     float persp = stepSize * (1.0f - percent) * ratio * 0.8f;
+    //     float perspX = ((coordinateX[0] - halfSize) / distance) * (distance - persp * i);
+    //     float perspY = ((coordinateY[0] - halfSize) / distance) * (distance - persp * i);
 
-    // Create illusion of a hole
-    juce::Path hole;
-    float halfInset = inset * 0.5f;
+    //     drawBlob(
+    //         (float) halfSize + perspX,
+    //         (float) halfSize + perspY,
+    //         radius,
+    //         juce::Colour(
+    //             (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
+    //             (u_int8_t) (g1 * percent + g2 * (1.0f - percent)),
+    //             (u_int8_t) (b1 * percent + b2 * (1.0f - percent))
+    //         ),
+    //         g
+    //     );
+    // }
 
-    hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
-    hole.setUsingNonZeroWinding(false);
+    // // Draw smallest size blob in base color
+    // juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    // drawBlob(coordinateX[0], coordinateY[0], blobSize, baseColor, g);
 
-    float ringOffset = 8;
-    float ringStrokeWidth = 2;
+    // // Create illusion of a hole
+    // juce::Path hole;
+    // float halfInset = inset * 0.5f;
 
-    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
-    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
-    hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
+    // hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
+    // hole.setUsingNonZeroWinding(false);
 
-    g.setColour(baseColor);
-    g.fillPath(hole);
+    // float ringOffset = 8;
+    // float ringStrokeWidth = 2;
+
+    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
+    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
+    // hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
+
+    // g.setColour(baseColor);
+    // g.fillPath(hole);
 
     // Cursor
     // g.setColour(gradientFrom);
     // g.drawLine(juce::Line<float>(coordinateX[1] - 10.0f, coordinateY[1], coordinateX[1] + 10.0f, coordinateY[1]));
     // g.drawLine(juce::Line<float>(coordinateX[1], coordinateY[1] - 10.0f, coordinateX[1], coordinateY[1] + 10.0f));
+}
+
+void ThermalComponent::drawBlob2(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {
+    g.setColour(gradientFrom);
+    g.drawEllipse(juce::Rectangle<float>(centerX - radius, centerY - radius, radius * 2.0f, radius * 2.0f), 3.0f);
+
+    // evenly distribute points around circle
+    size_t totalPoints = 6;
+    float theta = M_PI * 2.0 / totalPoints;
+    g.setColour(juce::Colours::white);
+
+    juce::Path blob;
+    float pr = 3;
+
+    for (size_t i = 0; i < totalPoints; i++) {
+        float pointX = centerX + radius * std::cos(theta * i);
+        float pointY = centerY + radius * std::sin(theta * i);
+
+        // show point coordinates
+        g.setColour(juce::Colours::white);
+        g.fillEllipse(juce::Rectangle<float>(pointX - pr, pointY - pr, pr * 2.0f, pr * 2.0f));
+
+        if (i == 0) {
+            blob.startNewSubPath(juce::Point<float>(pointX, pointY));
+        } else {
+            blob.lineTo(pointX, pointY);
+        }
+    }
+
+    blob.closeSubPath();
+    g.setColour(gradientTo);
+    g.strokePath(blob, juce::PathStrokeType(2.0f));
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

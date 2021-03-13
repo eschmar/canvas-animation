@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
-    setFramesPerSecond(24);
+    setFramesPerSecond(12);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -35,6 +35,13 @@ void ThermalComponent::paint(juce::Graphics& g) {
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
     drawBlob2(coordinateX[1], coordinateY[1], 196.0f, gradientTo, g);
+
+    juce::Path blobbed = generateBlob(coordinateX[1], coordinateY[1], 188.0f);
+
+    g.setColour(juce::Colours::blueviolet);
+    g.fillPath(blobbed);
+
+    // (float centerX, float centerY, float radius, size_t pointCount, float roundness)
 
     // float halfSize = size * 0.5f;
     // float distance = (float) euclideanDistance(halfSize, halfSize, coordinateX[0], coordinateY[0]);
@@ -93,6 +100,59 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // g.setColour(gradientFrom);
     // g.drawLine(juce::Line<float>(coordinateX[1] - 10.0f, coordinateY[1], coordinateX[1] + 10.0f, coordinateY[1]));
     // g.drawLine(juce::Line<float>(coordinateX[1], coordinateY[1] - 10.0f, coordinateX[1], coordinateY[1] + 10.0f));
+}
+
+juce::Path ThermalComponent::generateBlob(float centerX, float centerY, float radius, size_t pointCount, float roundness, bool wobbling) {
+    // Angle in radians between each point.
+    float theta = (float) (M_PI * 2.0 / pointCount);
+
+    // TODO
+    float perpDist = 128.0;
+
+    // Holds the points of which the blobs consists.
+    // std::vector<float[2]> points(pointCount + 1);
+    // std::vector<float[2]> vectors(pointCount + 1);
+    float points[pointCount + 1][2];
+    float vectors[pointCount + 1][2];
+
+    // Evenly lay out points on the circle.
+    for (size_t i = 0; i < pointCount; i++) {
+        // Add slow rotation
+        if (wobbling) wobbler += 0.01f;
+
+        vectors[i][0] = std::cos(theta * i + wobbler);
+        vectors[i][1] = std::sin(theta * i + wobbler);
+
+        points[i][0] = centerX + radius * vectors[i][0];
+        points[i][1] = centerY + radius * vectors[i][1];
+    }
+
+    // Close the path by adding the first point at the end again.
+    vectors[pointCount][0] = vectors[0][0];
+    vectors[pointCount][1] = vectors[0][1];
+    points[pointCount][0] = points[0][0];
+    points[pointCount][1] = points[0][1];
+
+    // Start the bezier path.
+    juce::Path blob;
+    blob.startNewSubPath(juce::Point<float>(points[0][0], points[0][1]));
+
+    // Draw bezier curves through points, skip first point.
+    for (size_t i = 1; i < pointCount + 1; i++) {
+        // Tangent vector for [x,y] is [y, -x]
+        // Calculate bezier points for the previous point.
+        float bezierX1 = points[i - 1][0] - vectors[i - 1][1] * perpDist;
+        float bezierY1 = points[i - 1][1] - (-1.0f * vectors[i - 1][0]) * perpDist;
+
+        // Calculate bezier points for the target point.
+        float bezierX2 = points[i][0] + vectors[i][1] * perpDist;
+        float bezierY2 = points[i][1] + (-1.0f * vectors[i][0]) * perpDist;
+
+        // blob.lineTo(pointX, pointY);
+        blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, points[i][0], points[i][1]);
+    }
+
+    return blob;
 }
 
 void ThermalComponent::drawBlob2(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

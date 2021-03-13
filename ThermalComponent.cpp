@@ -104,8 +104,8 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, float centerX, floa
     float px = centerX + radius * vx;
     float py = centerX + radius * vy;
 
-    float t = (centerX + radius - px) / std::sin(theta);
-    float s = py - t * std::cos(theta);
+    float t = (centerX + radius - px) / vy;
+    float s = py - t * vx;
     float bezierDistance = (float) euclideanDistance(px, py, centerX + radius, s) * roundness;
 
     // Start the bezier path.

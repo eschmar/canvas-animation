@@ -84,6 +84,11 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     g.setColour(baseColor);
     g.fillPath(hole);
+
+    // Cursor
+    // g.setColour(gradientFrom);
+    // g.drawLine(juce::Line<float>(coordinateX[1] - 10.0f, coordinateY[1], coordinateX[1] + 10.0f, coordinateY[1]));
+    // g.drawLine(juce::Line<float>(coordinateX[1], coordinateY[1] - 10.0f, coordinateX[1], coordinateY[1] + 10.0f));
 }
 
 void ThermalComponent::drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g) {

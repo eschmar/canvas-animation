@@ -110,10 +110,8 @@ juce::Path ThermalComponent::generateBlob(float centerX, float centerY, float ra
     float perpDist = 128.0;
 
     // Holds the points of which the blobs consists.
-    // std::vector<float[2]> points(pointCount + 1);
-    // std::vector<float[2]> vectors(pointCount + 1);
-    float points[pointCount + 1][2];
-    float vectors[pointCount + 1][2];
+    std::vector<std::vector<float>> points(pointCount + 1, std::vector<float>(2));
+    std::vector<std::vector<float>> vectors(pointCount + 1, std::vector<float>(2));
 
     // Evenly lay out points on the circle.
     for (size_t i = 0; i < pointCount; i++) {

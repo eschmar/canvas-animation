@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
-    setFramesPerSecond(1);
+    setFramesPerSecond(24);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -25,7 +25,7 @@ ThermalComponent::ThermalComponent(
     coordinateY[0] = getHeight() * 0.5f;
     coordinateY[1] = getHeight() * 0.5f;
 
-    wobbler = (float) M_PI;
+    wobbler = (float) 0.0f;
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
@@ -100,7 +100,7 @@ void ThermalComponent::drawBlob2(float centerX, float centerY, float radius, juc
     g.drawEllipse(juce::Rectangle<float>(centerX - radius, centerY - radius, radius * 2.0f, radius * 2.0f), 1.0f);
 
     // evenly distribute points around circle
-    size_t totalPoints = 6;
+    size_t totalPoints = 3;
     float theta = (float) (M_PI * 2.0 / totalPoints);
     g.setColour(juce::Colours::white);
 
@@ -112,10 +112,13 @@ void ThermalComponent::drawBlob2(float centerX, float centerY, float radius, juc
 
     // float prevX, prevY, prevVectorX, prevVectorY;
     for (size_t i = 0; i < totalPoints; i++) {
-        float vectorX = std::cos(theta * i);
-        float vectorY = std::sin(theta * i);
+        float vectorX = std::cos(theta * i + wobbler);
+        float vectorY = std::sin(theta * i + wobbler);
         float pointX = centerX + radius * vectorX;
         float pointY = centerY + radius * vectorY;
+
+        // Add slow rotation
+        wobbler += 0.01f;
 
         // show point coordinates
         g.setColour(juce::Colours::white);

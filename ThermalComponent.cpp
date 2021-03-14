@@ -8,24 +8,21 @@ ThermalComponent::ThermalComponent(
     float blobSize_,
     juce::Colour gradientFrom_,
     juce::Colour gradientTo_
-) : TrackpadComponent(size_, inset_, fps_) {
+) : TrackpadComponent(size_, inset_, fps_), current(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
-    setFramesPerSecond(24);
+    setFramesPerSecond(1);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
     gradientFrom = gradientFrom_;
     gradientTo = gradientTo_;
 
-    coordinateX.resize(2);
-    coordinateX[0] = getWidth() * 0.5f;
-    coordinateX[1] = getWidth() * 0.5f;
-
-    coordinateY.resize(2);
-    coordinateY[0] = getHeight() * 0.5f;
-    coordinateY[1] = getHeight() * 0.5f;
+    size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
+    blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) 6 + 1));
+    vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) 6 + 1));
 
     wobbler = (float) 0.0f;
+    rotator = (float) 0.0f;
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
@@ -34,11 +31,11 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    juce::Path triangle = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 3, 1.1f);
-    g.setColour(juce::Colour(0x33aa1100));
-    g.fillPath(triangle);
+    // juce::Path triangle = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 8, 0.6f);
+    // g.setColour(juce::Colour(0x33aa1100));
+    // g.fillPath(triangle);
 
-    juce::Path hexagon = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 6, 1.1f);
+    juce::Path hexagon = generateBlob(g, target.x(), target.y(), 128.0f, 6, 1.1f);
     g.setColour(juce::Colour(0x330011aa));
     g.fillPath(hexagon);
 
@@ -155,12 +152,12 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
         float deltaY = event.y - center;
 
         float length = (float) std::sqrt(std::pow(deltaX, 2.0) + std::pow(deltaY, 2.0));
-        coordinateX[1] = center + (deltaX / length) * radius;
-        coordinateY[1] = center + (deltaY / length) * radius;
+        target.x(center + (deltaX / length) * radius);
+        target.y(center + (deltaY / length) * radius);
 
     } else {
-        coordinateX[1] = event.x;
-        coordinateY[1] = event.y;
+        target.x(event.x);
+        target.y(event.y);
     }
 
     // map coordinates to unit circle
@@ -191,13 +188,41 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
-    // Todo.
+    size_t pointCount = blobs[0].size() - 1;
+    float radius = 128.0;
+
+    // Angle in radians between each point.
+    float theta = (float) (M_PI * 2.0 / pointCount);
+    size_t i = 0;
+
+    // Evenly lay out points on the circle.
+    for (size_t j = 0; j < pointCount; j++) {
+        // Add slow rotation
+        // if (wobbling) wobbler += 0.005f;
+
+        vecs[i][j].x(std::cos(theta * j + wobbler));
+        vecs[i][j].y(std::sin(theta * j + wobbler));
+
+        // Bring back "wobbling" and distinguish to rotator.
+
+        // float r = 48.0 * (juce::Random::getSystemRandom().nextFloat() - 0.5f);
+        float r = 0.0f;
+
+        blobs[i][j].x(current.x() + (radius + r) * vecs[i][j].x());
+        blobs[i][j].y(current.y() + (radius + r) * vecs[i][j].y());
+    }
+
+    // Close the path by adding the first point at the end again.
+    vecs[i][pointCount].x(vecs[i][0].x());
+    vecs[i][pointCount].y(vecs[i][0].y());
+    blobs[i][pointCount].x(blobs[i][0].x());
+    blobs[i][pointCount].y(blobs[i][0].y());
 }
 
 void ThermalComponent::update() {
     // basic tweening
-    coordinateX[0] += (coordinateX[1] - coordinateX[0]) * 0.1f;
-    coordinateY[0] += (coordinateY[1] - coordinateY[0]) * 0.1f;
+    current.x(current.x() + (target.x() - current.x()) * 0.1f);
+    current.y(current.y() + (target.y() - current.y()) * 0.1f);
 }
 
 void ThermalComponent::resized() {

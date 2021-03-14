@@ -3,7 +3,7 @@
 #include "ThermalComponent.h"
 #include <JuceHeader.h>
 
-class GuiAppApplication  : public juce::JUCEApplication {
+class GuiAppApplication : public juce::JUCEApplication {
 public:
     GuiAppApplication() {}
 

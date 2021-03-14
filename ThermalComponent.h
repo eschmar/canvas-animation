@@ -6,6 +6,7 @@
 // you could `#include <JuceHeader.h>` here instead, to make all your module headers visible.
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "TrackpadComponent.h"
+#include "Point.h"
 
 /*
     This component lives inside our window, and this is where you should put all
@@ -34,9 +35,14 @@ public:
     void update() override;
 
 private:
-    float relX, relY, wobbler, stepSize, blobSize;
+    Point<float> current, target;
+    std::vector<std::vector<Point<float>>> blobs, vecs;
+
+
+
+    float relX, relY, wobbler, rotator, stepSize, blobSize;
     juce::Colour gradientFrom, gradientTo;
-    std::vector<float> coordinateX, coordinateY;
+
     void computeTarget(bool fastforward = false);
     void drawBlob(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g);
     void drawBlob2(float centerX, float centerY, float radius, juce::Colour colour, juce::Graphics& g);

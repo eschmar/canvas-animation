@@ -73,19 +73,19 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& cente
     std::vector<Point<float>> vectors(pointCount + 1);
 
     // Evenly lay out points on the circle.
-    for (size_t i = 0; i < pointCount; i++) {
+    for (size_t j = 0; j < pointCount; j++) {
         // Add slow rotation
         if (wobbling) wobbler += 0.005f;
 
-        vectors[i].x(std::cos(theta * i + wobbler));
-        vectors[i].y(std::sin(theta * i + wobbler));
+        vectors[j].x(std::cos(theta * j + wobbler));
+        vectors[j].y(std::sin(theta * j + wobbler));
 
-        points[i].x(center.x() + radius * vectors[i].x());
-        points[i].y(center.y() + radius * vectors[i].y());
+        points[j].x(center.x() + radius * vectors[j].x());
+        points[j].y(center.y() + radius * vectors[j].y());
 
         // show point coordinates
         g.setColour(juce::Colours::white);
-        g.fillEllipse(juce::Rectangle<float>(points[i].x() - pointRadius, points[i].y() - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
+        g.fillEllipse(juce::Rectangle<float>(points[j].x() - pointRadius, points[j].y() - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
     }
 
     // Close the path by adding the first point at the end again.
@@ -110,28 +110,28 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& cente
     blob.startNewSubPath(juce::Point<float>(points[0].x(), points[0].y()));
 
     // Draw bezier curves through points, skip first point.
-    for (size_t i = 1; i < pointCount + 1; i++) {
+    for (size_t j = 1; j < pointCount + 1; j++) {
         // Tangent vector for [x,y] is [y, -x]
         // Calculate bezier points for the previous point.
-        float bezierX1 = points[i - 1].x() - vectors[i - 1].y() * bezierDistance;
-        float bezierY1 = points[i - 1].y() - (-1.0f * vectors[i - 1].x()) * bezierDistance;
+        float bezierX1 = points[j - 1].x() - vectors[j - 1].y() * bezierDistance;
+        float bezierY1 = points[j - 1].y() - (-1.0f * vectors[j - 1].x()) * bezierDistance;
 
         // Calculate bezier points for the target point.
-        float bezierX2 = points[i].x() + vectors[i].y() * bezierDistance;
-        float bezierY2 = points[i].y() + (-1.0f * vectors[i].x()) * bezierDistance;
+        float bezierX2 = points[j].x() + vectors[j].y() * bezierDistance;
+        float bezierY2 = points[j].y() + (-1.0f * vectors[j].x()) * bezierDistance;
 
         // blob.lineTo(pointX, pointY);
-        blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, points[i].x(), points[i].y());
+        blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, points[j].x(), points[j].y());
 
         // draw bezier curve points for the second point
-        if (i == 1) {
+        if (j == 1) {
             g.setColour(juce::Colours::cyan);
             g.fillEllipse(juce::Rectangle<float>(bezierX1 - pointRadius, bezierY1 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
-            g.drawLine(juce::Line<float>(points[i - 1].x(), points[i - 1].y(), bezierX1, bezierY1));
+            g.drawLine(juce::Line<float>(points[j - 1].x(), points[j - 1].y(), bezierX1, bezierY1));
 
             g.setColour(juce::Colours::teal);
             g.fillEllipse(juce::Rectangle<float>(bezierX2 - pointRadius, bezierY2 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
-            g.drawLine(juce::Line<float>(points[i].x(), points[i].y(), bezierX2, bezierY2));
+            g.drawLine(juce::Line<float>(points[j].x(), points[j].y(), bezierX2, bezierY2));
         }
     }
 

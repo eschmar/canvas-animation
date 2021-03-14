@@ -35,7 +35,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // g.setColour(juce::Colour(0x33aa1100));
     // g.fillPath(triangle);
 
-    juce::Path hexagon = generateBlob(g, target.x(), target.y(), 128.0f, 6, 1.1f);
+    juce::Path hexagon = generateBlob(g, current, 128.0f, 6, 1.1f);
     g.setColour(juce::Colour(0x330011aa));
     g.fillPath(hexagon);
 
@@ -62,7 +62,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // g.drawLine(juce::Line<float>(coordinateX[1], coordinateY[1] - 10.0f, coordinateX[1], coordinateY[1] + 10.0f));
 }
 
-juce::Path ThermalComponent::generateBlob(juce::Graphics& g, float centerX, float centerY, float radius, size_t pointCount, float roundness, bool wobbling) {
+juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount, float roundness, bool wobbling) {
     float pointRadius = 3.0f;
 
     // Angle in radians between each point.
@@ -80,8 +80,8 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, float centerX, floa
         vectors[i][0] = std::cos(theta * i + wobbler);
         vectors[i][1] = std::sin(theta * i + wobbler);
 
-        points[i][0] = centerX + radius * vectors[i][0];
-        points[i][1] = centerY + radius * vectors[i][1];
+        points[i][0] = center.x() + radius * vectors[i][0];
+        points[i][1] = center.y() + radius * vectors[i][1];
 
         // show point coordinates
         g.setColour(juce::Colours::white);
@@ -95,15 +95,15 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, float centerX, floa
     points[pointCount][1] = points[0][1];
 
     // Calculate distance to the point of intersection for two tangents, making
-    // use of the fact that the first intersection will be on (centerX + radius).
+    // use of the fact that the first intersection will be on (center.x() + radius).
     float vx = std::cos(theta);
     float vy = std::sin(theta);
-    float px = centerX + radius * vx;
-    float py = centerX + radius * vy;
+    float px = center.x() + radius * vx;
+    float py = center.x() + radius * vy;
 
-    float t = (centerX + radius - px) / vy;
+    float t = (center.x() + radius - px) / vy;
     float s = py - t * vx;
-    float bezierDistance = (float) euclideanDistance(px, py, centerX + radius, s) * roundness;
+    float bezierDistance = (float) euclideanDistance(px, py, center.x() + radius, s) * roundness;
 
     // Start the bezier path.
     juce::Path blob;

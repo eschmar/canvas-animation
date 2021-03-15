@@ -81,7 +81,7 @@ juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& cente
 
     float t = (center.x() + radius - px) / vy;
     float s = py - t * vx;
-    float bezierDistance = (float) euclideanDistance(px, py, center.x() + radius, s) * roundness;
+    float bezierDistance = Point<float>::distance(px, py, center.x() + radius, s) * roundness;
 
     // Start the bezier path.
     juce::Path blob;

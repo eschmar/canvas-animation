@@ -8,7 +8,7 @@ ThermalComponent::ThermalComponent(
     float blobSize_,
     juce::Colour gradientFrom_,
     juce::Colour gradientTo_
-) : TrackpadComponent(size_, inset_, fps_), current(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
+) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
     setFramesPerSecond(24);
 
@@ -38,7 +38,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // g.setColour(juce::Colour(0x33aa1100));
     // g.fillPath(triangle);
 
-    juce::Path hexagon = generateBlob(g, current, 128.0f, 6, 1.1f);
+    juce::Path hexagon = generateBlob(g, position, 128.0f, 6, 1.1f);
     g.setColour(juce::Colour(0x330011aa));
     g.fillPath(hexagon);
 
@@ -181,8 +181,8 @@ void ThermalComponent::computeTarget(bool fastforward) {
         vecs[i][j].x(std::cos(theta * j + wobbler));
         vecs[i][j].y(std::sin(theta * j + wobbler));
 
-        blobs[i][j].x(current.x() + radius * vecs[i][j].x());
-        blobs[i][j].y(current.y() + radius * vecs[i][j].y());
+        blobs[i][j].x(position.x() + radius * vecs[i][j].x());
+        blobs[i][j].y(position.y() + radius * vecs[i][j].y());
     }
 
     // Close the path by adding the first point at the end again.
@@ -194,8 +194,8 @@ void ThermalComponent::computeTarget(bool fastforward) {
 
 void ThermalComponent::update() {
     // basic tweening
-    current.x(current.x() + (target.x() - current.x()) * 0.1f);
-    current.y(current.y() + (target.y() - current.y()) * 0.1f);
+    position.x(position.x() + (target.x() - position.x()) * 0.1f);
+    position.y(position.y() + (target.y() - position.y()) * 0.1f);
 }
 
 void ThermalComponent::resized() {

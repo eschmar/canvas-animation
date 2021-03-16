@@ -35,7 +35,7 @@ public:
     void update() override;
 
 private:
-    Point<float> current, target;
+    Point<float> position, target;
     std::vector<std::vector<Point<float>>> blobs, vecs;
 
 

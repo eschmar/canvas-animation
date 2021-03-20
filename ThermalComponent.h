@@ -36,11 +36,11 @@ public:
 
 private:
     Point<float> position, target;
-    std::vector<std::vector<Point<float>>> blobs, vecs;
+    std::vector<std::vector<Point<float>>> blobs, blobsTarget, vecs;
+    std::vector<std::vector<float>> radi;
+    size_t verticeCount = 6;
 
-
-
-    float relX, relY, wobbler, rotator, stepSize, blobSize;
+    float relX, relY, wobbler, rotator, stepSize, blobSize, minRadius;
     juce::Colour gradientFrom, gradientTo;
 
     void computeTarget(bool fastforward = false);

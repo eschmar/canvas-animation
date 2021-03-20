@@ -16,31 +16,82 @@ ThermalComponent::ThermalComponent(
     blobSize = blobSize_;
     gradientFrom = gradientFrom_;
     gradientTo = gradientTo_;
+    minRadius = 48.0;
 
     size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
-    size_t vertices = 6;
 
-    blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) vertices + 1));
-    vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) vertices + 1));
+    blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    blobsTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    radi.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
+
+    vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
 
     wobbler = (float) 0.0f;
     rotator = (float) 0.0f;
-    computeTarget();
+    computeTarget(true);
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    // u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
-    // u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
-
     g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
-    // juce::Path triangle = generateBlob(g, coordinateX[1], coordinateY[1], 128.0f, 8, 0.6f);
-    // g.setColour(juce::Colour(0x33aa1100));
-    // g.fillPath(triangle);
+    u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
+    u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
 
-    juce::Path hexagon = generateBlob(g, position, 128.0f, 6, 1.1f);
-    g.setColour(juce::Colour(0x330011aa));
-    g.fillPath(hexagon);
+    float roundness = 1.1f;
+    size_t pointCount = blobs.size();
+
+    for (size_t i = pointCount - 1; i < pointCount; --i) {
+        // Angle in radians between each point.
+        float theta = (float) (M_PI * 2.0 / pointCount);
+
+        // Calculate distance to the point of intersection for two tangents, making
+        // use of the fact that the first intersection will be on (center.x() + radius).
+        float baseRadius = minRadius + (stepSize * i);
+        float vx = std::cos(theta);
+        float vy = std::sin(theta);
+        float px = position.x() + baseRadius * vx;
+        float py = position.x() + baseRadius * vy;
+
+        float t = (position.x() + baseRadius - px) / vy;
+        float s = py - t * vx;
+        float bezierDistance = Point<float>::distance(px, py, position.x() + baseRadius, s) * roundness;
+
+        // Start the bezier path.
+        juce::Path blob;
+        blob.startNewSubPath(juce::Point<float>(blobs[i][0].x(), blobs[i][0].y()));
+
+        // Draw bezier curves through points, skip first point.
+        for (size_t j = 1; j < blobs[i].size(); j++) {
+            // Tangent vector for [x,y] is [y, -x]
+            // Calculate bezier points for the previous point.
+            float bezierX1 = blobs[i][j - 1].x() - vecs[i][j - 1].y() * bezierDistance;
+            float bezierY1 = blobs[i][j - 1].y() - (-1.0f * vecs[i][j - 1].x()) * bezierDistance;
+
+            // Calculate bezier points for the target point.
+            float bezierX2 = blobs[i][j].x() + vecs[i][j].y() * bezierDistance;
+            float bezierY2 = blobs[i][j].y() + (-1.0f * vecs[i][j].x()) * bezierDistance;
+
+            // blob.lineTo(pointX, pointY);
+            blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, blobs[i][j].x(), blobs[i][j].y());
+        }
+
+        if (i == 0) {
+            g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            g.fillPath(blob);
+            continue;
+        }
+
+        // Calculate next colour in gradient.
+        float percent = (float) i / (pointCount - 1);
+
+        g.setColour(juce::Colour(
+            (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
+            (u_int8_t) (g1 * percent + g2 * (1.0f - percent)),
+            (u_int8_t) (b1 * percent + b2 * (1.0f - percent))
+        ));
+
+        g.fillPath(blob);
+    }
 
     // // Create illusion of a hole
     // juce::Path hole;
@@ -162,40 +213,69 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     float squareY = (float) (0.5 * std::sqrt(termy1) - 0.5 * std::sqrt(termy2));
     relY = (squareY + 1.0f) * 0.5f;
 
-    computeTarget();
+    // computeTarget();
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
-    size_t vertices = 6;
-    float radius = 128.0;
+    float radius = minRadius;
 
     // Angle in radians between each point.
-    float theta = (float) (M_PI * 2.0 / vertices);
-    size_t i = 0;
+    float theta = (float) (M_PI * 2.0 / verticeCount);
+    // size_t i = 0;
 
-    // Evenly lay out points on the circle.
-    for (size_t j = 0; j < vertices; j++) {
-        // Add slow rotation
-        // if (wobbling) wobbler += 0.005f;
+    for (size_t i = 0; i < blobs.size(); i++) {
+        // Evenly lay out points on the circle.
+        for (size_t j = 0; j < verticeCount; j++) {
+            // Add slow rotation
+            // if (wobbling) wobbler += 0.005f;
 
-        vecs[i][j].x(std::cos(theta * j + wobbler));
-        vecs[i][j].y(std::sin(theta * j + wobbler));
+            float localRadius = radius + (stepSize * i) + 48.0 * (juce::Random::getSystemRandom().nextFloat() - 0.5);
+            radi[i][j] = localRadius;
 
-        blobs[i][j].x(position.x() + radius * vecs[i][j].x());
-        blobs[i][j].y(position.y() + radius * vecs[i][j].y());
+            vecs[i][j].x(std::cos(theta * j + wobbler));
+            vecs[i][j].y(std::sin(theta * j + wobbler));
+
+            blobsTarget[i][j].x(position.x() + localRadius * vecs[i][j].x());
+            blobsTarget[i][j].y(position.y() + localRadius * vecs[i][j].y());
+            // printf("<P>: <%.2f, %.2f>\n", blobsTarget[i][j].x(), blobsTarget[i][j].y());
+
+            if (!fastforward) continue;
+            blobs[i][j].x(position.x() + localRadius * vecs[i][j].x());
+            blobs[i][j].y(position.y() + localRadius * vecs[i][j].y());
+        }
+
+        // Close the path by adding the first point at the end again.
+        vecs[i][verticeCount].x(vecs[i][0].x());
+        vecs[i][verticeCount].y(vecs[i][0].y());
+        blobsTarget[i][verticeCount].x(blobsTarget[i][0].x());
+        blobsTarget[i][verticeCount].y(blobsTarget[i][0].y());
+
+        if (fastforward) {
+            blobs[i][verticeCount].x(blobs[i][0].x());
+            blobs[i][verticeCount].y(blobs[i][0].y());
+        }
     }
-
-    // Close the path by adding the first point at the end again.
-    vecs[i][vertices].x(vecs[i][0].x());
-    vecs[i][vertices].y(vecs[i][0].y());
-    blobs[i][vertices].x(blobs[i][0].x());
-    blobs[i][vertices].y(blobs[i][0].y());
 }
 
 void ThermalComponent::update() {
-    // basic tweening
+    // basic cursor tweening
     position.x(position.x() + (target.x() - position.x()) * 0.1f);
     position.y(position.y() + (target.y() - position.y()) * 0.1f);
+
+    // blob radi tweening
+    for (size_t i = 0; i < blobs.size(); i++) {
+        for (size_t j = 0; j < verticeCount; j++) {
+            blobs[i][j].x(blobs[i][j].x() + (blobsTarget[i][j].x() - blobs[i][j].x()) * 0.1f);
+            blobs[i][j].y(blobs[i][j].y() + (blobsTarget[i][j].y() - blobs[i][j].y()) * 0.1f);
+        }
+
+        blobs[i][verticeCount].x(blobs[i][verticeCount].x() + (blobsTarget[i][verticeCount].x() - blobs[i][verticeCount].x()) * 0.1f);
+        blobs[i][verticeCount].y(blobs[i][verticeCount].y() + (blobsTarget[i][verticeCount].y() - blobs[i][verticeCount].y()) * 0.1f);
+    }
+
+    if (rotator++ < 20.0) return;
+    computeTarget();
+    rotator = 0.0;
 }
 
 void ThermalComponent::resized() {

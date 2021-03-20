@@ -230,19 +230,19 @@ void ThermalComponent::computeTarget(bool fastforward) {
             // Add slow rotation
             // if (wobbling) wobbler += 0.005f;
 
-            float localRadius = radius + (stepSize * i) + (stepSize * 0.9) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
-            radi[i][j] = localRadius;
+            // TODO: needs to be updated only at the right time.
+            radi[i][j] = radius + (stepSize * i) + (stepSize * 0.5) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
 
             vecs[i][j].x(std::cos(theta * j + wobbler));
             vecs[i][j].y(std::sin(theta * j + wobbler));
 
-            blobsTarget[i][j].x(position.x() + localRadius * vecs[i][j].x());
-            blobsTarget[i][j].y(position.y() + localRadius * vecs[i][j].y());
+            blobsTarget[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
+            blobsTarget[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
             // printf("<P>: <%.2f, %.2f>\n", blobsTarget[i][j].x(), blobsTarget[i][j].y());
 
             if (!fastforward) continue;
-            blobs[i][j].x(position.x() + localRadius * vecs[i][j].x());
-            blobs[i][j].y(position.y() + localRadius * vecs[i][j].y());
+            blobs[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
+            blobs[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
         }
 
         // Close the path by adding the first point at the end again.

@@ -32,7 +32,8 @@ ThermalComponent::ThermalComponent(
 }
 
 void ThermalComponent::paint(juce::Graphics& g) {
-    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+    juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
+    g.fillAll(gradientFrom);
 
     u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
     u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
@@ -76,7 +77,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
         }
 
         if (i == 0) {
-            g.setColour(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
+            g.setColour(baseColor);
             g.fillPath(blob);
             continue;
         }
@@ -94,26 +95,26 @@ void ThermalComponent::paint(juce::Graphics& g) {
     }
 
     // // Create illusion of a hole
-    // juce::Path hole;
-    // float halfInset = inset * 0.5f;
+    /* juce::Path hole;
+    float halfInset = inset * 0.5f;
 
-    // hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
-    // hole.setUsingNonZeroWinding(false);
+    hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
+    hole.setUsingNonZeroWinding(false);
 
-    // float ringOffset = 8;
-    // float ringStrokeWidth = 2;
+    float ringOffset = 8;
+    float ringStrokeWidth = 2;
 
-    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
-    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
-    // hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
+    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
+    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
+    hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
 
-    // g.setColour(baseColor);
-    // g.fillPath(hole);
+    g.setColour(baseColor);
+    g.fillPath(hole);
 
     // Cursor
-    // g.setColour(gradientFrom);
-    // g.drawLine(juce::Line<float>(coordinateX[1] - 10.0f, coordinateY[1], coordinateX[1] + 10.0f, coordinateY[1]));
-    // g.drawLine(juce::Line<float>(coordinateX[1], coordinateY[1] - 10.0f, coordinateX[1], coordinateY[1] + 10.0f));
+    g.setColour(gradientFrom);
+    g.drawLine(juce::Line<float>(target.x() - 10.0f, target.y(), target.x() + 10.0f, target.y()));
+    g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f)); */
 }
 
 juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount, float roundness, bool wobbling) {
@@ -213,7 +214,7 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     float squareY = (float) (0.5 * std::sqrt(termy1) - 0.5 * std::sqrt(termy2));
     relY = (squareY + 1.0f) * 0.5f;
 
-    // computeTarget();
+    computeTarget();
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
@@ -229,7 +230,7 @@ void ThermalComponent::computeTarget(bool fastforward) {
             // Add slow rotation
             // if (wobbling) wobbler += 0.005f;
 
-            float localRadius = radius + (stepSize * i) + 48.0 * (juce::Random::getSystemRandom().nextFloat() - 0.5);
+            float localRadius = radius + (stepSize * i) + (stepSize * 0.9) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
             radi[i][j] = localRadius;
 
             vecs[i][j].x(std::cos(theta * j + wobbler));
@@ -274,7 +275,7 @@ void ThermalComponent::update() {
     }
 
     if (rotator++ < 20.0) return;
-    computeTarget();
+    // computeTarget();
     rotator = 0.0;
 }
 

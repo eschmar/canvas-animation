@@ -117,60 +117,6 @@ void ThermalComponent::paint(juce::Graphics& g) {
     g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f)); */
 }
 
-juce::Path ThermalComponent::generateBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount, float roundness, bool wobbling) {
-    float pointRadius = 3.0f;
-    size_t i = 0;
-
-    // Angle in radians between each point.
-    float theta = (float) (M_PI * 2.0 / pointCount);
-
-    // Calculate distance to the point of intersection for two tangents, making
-    // use of the fact that the first intersection will be on (center.x() + radius).
-    float vx = std::cos(theta);
-    float vy = std::sin(theta);
-    float px = center.x() + radius * vx;
-    float py = center.x() + radius * vy;
-
-    float t = (center.x() + radius - px) / vy;
-    float s = py - t * vx;
-    float bezierDistance = Point<float>::distance(px, py, center.x() + radius, s) * roundness;
-
-    // Start the bezier path.
-    juce::Path blob;
-    blob.startNewSubPath(juce::Point<float>(blobs[i][0].x(), blobs[i][0].y()));
-
-    // Draw bezier curves through points, skip first point.
-    for (size_t j = 1; j < pointCount + 1; j++) {
-        // Tangent vector for [x,y] is [y, -x]
-        // Calculate bezier points for the previous point.
-        float bezierX1 = blobs[i][j - 1].x() - vecs[i][j - 1].y() * bezierDistance;
-        float bezierY1 = blobs[i][j - 1].y() - (-1.0f * vecs[i][j - 1].x()) * bezierDistance;
-
-        // Calculate bezier points for the target point.
-        float bezierX2 = blobs[i][j].x() + vecs[i][j].y() * bezierDistance;
-        float bezierY2 = blobs[i][j].y() + (-1.0f * vecs[i][j].x()) * bezierDistance;
-
-        // blob.lineTo(pointX, pointY);
-        blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, blobs[i][j].x(), blobs[i][j].y());
-
-        // draw bezier curve points for the second point
-        if (j == 1) {
-            g.setColour(juce::Colours::cyan);
-            g.fillEllipse(juce::Rectangle<float>(bezierX1 - pointRadius, bezierY1 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
-            g.drawLine(juce::Line<float>(blobs[i][j - 1].x(), blobs[i][j - 1].y(), bezierX1, bezierY1));
-
-            g.setColour(juce::Colours::teal);
-            g.fillEllipse(juce::Rectangle<float>(bezierX2 - pointRadius, bezierY2 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
-            g.drawLine(juce::Line<float>(blobs[i][j].x(), blobs[i][j].y(), bezierX2, bezierY2));
-        }
-    }
-
-    g.setColour(gradientTo);
-    g.strokePath(blob, juce::PathStrokeType(2.0f));
-
-    return blob;
-}
-
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     float radius = (size - inset) / 2.0f;
     float center = size * 0.5f;
@@ -236,6 +182,9 @@ void ThermalComponent::computeTarget(bool fastforward) {
             vecs[i][j].x(std::cos(theta * j + wobbler));
             vecs[i][j].y(std::sin(theta * j + wobbler));
 
+
+            // TODO: calculate offset from current position instead, so the changes can follow the cursor
+
             blobsTarget[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
             blobsTarget[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
             // printf("<P>: <%.2f, %.2f>\n", blobsTarget[i][j].x(), blobsTarget[i][j].y());
@@ -275,7 +224,7 @@ void ThermalComponent::update() {
     }
 
     if (rotator++ < 20.0) return;
-    // computeTarget();
+    computeTarget();
     rotator = 0.0;
 }
 
@@ -283,4 +232,58 @@ void ThermalComponent::resized() {
     // This is called when the ThermalComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
+}
+
+juce::Path ThermalComponent::drawBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount, float roundness, bool wobbling) {
+    float pointRadius = 3.0f;
+    size_t i = 0;
+
+    // Angle in radians between each point.
+    float theta = (float) (M_PI * 2.0 / pointCount);
+
+    // Calculate distance to the point of intersection for two tangents, making
+    // use of the fact that the first intersection will be on (center.x() + radius).
+    float vx = std::cos(theta);
+    float vy = std::sin(theta);
+    float px = center.x() + radius * vx;
+    float py = center.x() + radius * vy;
+
+    float t = (center.x() + radius - px) / vy;
+    float s = py - t * vx;
+    float bezierDistance = Point<float>::distance(px, py, center.x() + radius, s) * roundness;
+
+    // Start the bezier path.
+    juce::Path blob;
+    blob.startNewSubPath(juce::Point<float>(blobs[i][0].x(), blobs[i][0].y()));
+
+    // Draw bezier curves through points, skip first point.
+    for (size_t j = 1; j < pointCount + 1; j++) {
+        // Tangent vector for [x,y] is [y, -x]
+        // Calculate bezier points for the previous point.
+        float bezierX1 = blobs[i][j - 1].x() - vecs[i][j - 1].y() * bezierDistance;
+        float bezierY1 = blobs[i][j - 1].y() - (-1.0f * vecs[i][j - 1].x()) * bezierDistance;
+
+        // Calculate bezier points for the target point.
+        float bezierX2 = blobs[i][j].x() + vecs[i][j].y() * bezierDistance;
+        float bezierY2 = blobs[i][j].y() + (-1.0f * vecs[i][j].x()) * bezierDistance;
+
+        // blob.lineTo(pointX, pointY);
+        blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, blobs[i][j].x(), blobs[i][j].y());
+
+        // draw bezier curve points for the second point
+        if (j == 1) {
+            g.setColour(juce::Colours::cyan);
+            g.fillEllipse(juce::Rectangle<float>(bezierX1 - pointRadius, bezierY1 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
+            g.drawLine(juce::Line<float>(blobs[i][j - 1].x(), blobs[i][j - 1].y(), bezierX1, bezierY1));
+
+            g.setColour(juce::Colours::teal);
+            g.fillEllipse(juce::Rectangle<float>(bezierX2 - pointRadius, bezierY2 - pointRadius, pointRadius * 2.0f, pointRadius * 2.0f));
+            g.drawLine(juce::Line<float>(blobs[i][j].x(), blobs[i][j].y(), bezierX2, bezierY2));
+        }
+    }
+
+    g.setColour(gradientTo);
+    g.strokePath(blob, juce::PathStrokeType(2.0f));
+
+    return blob;
 }

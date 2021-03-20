@@ -44,7 +44,7 @@ private:
     juce::Colour gradientFrom, gradientTo;
 
     void computeTarget(bool fastforward = false);
-    juce::Path generateBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount = 3, float roundness = 1.0f, bool wobbling = true);
+    juce::Path drawBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount = 3, float roundness = 1.0f, bool wobbling = true);
 
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ThermalComponent)

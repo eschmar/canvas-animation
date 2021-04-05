@@ -37,7 +37,7 @@ public:
 private:
     Point<float> position, target;
     std::vector<std::vector<Point<float>>> blobs, blobsTarget, vecs;
-    std::vector<std::vector<float>> radi;
+    std::vector<std::vector<float>> radi, radiTarget;
     size_t verticeCount = 6;
 
     float relX, relY, wobbler, rotator, stepSize, blobSize, minRadius;

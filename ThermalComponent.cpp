@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
-    setFramesPerSecond(24);
+    setFramesPerSecond(144);
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -23,6 +23,7 @@ ThermalComponent::ThermalComponent(
     blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
     blobsTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
     radi.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
+    radiTarget.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
 
     vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
 
@@ -167,29 +168,32 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
-    float radius = minRadius;
-
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
+
+    // Periodically randomise blob radius slightly.
+    bool shouldRandomiseRadius = fmod(getFrameCounter(), 48) == 0;
+
+    // Add slow rotation.
+    wobbler += 0.002f;
 
     for (size_t i = 0; i < blobs.size(); i++) {
         // Evenly lay out points on the circle.
         for (size_t j = 0; j < verticeCount; j++) {
-            // Add slow rotation
-            // if (wobbling) wobbler += 0.005f;
+            float radius = minRadius + (stepSize * i);
 
-            // TODO: needs to be updated only at the right time.
-            radi[i][j] = radius + (stepSize * i) + (stepSize * 0.5) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
+            if (shouldRandomiseRadius) {
+                // Radnomise radius to generate different blobs.
+                radiTarget[i][j] = radius + (stepSize * 0.4) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
+                if (fastforward) radi[i][j] = radiTarget[i][j];
+            }
 
             vecs[i][j].x(std::cos(theta * j + wobbler));
             vecs[i][j].y(std::sin(theta * j + wobbler));
-
-
-            // TODO: calculate offset from current position instead, so the changes can follow the cursor
+            // printf(">>> %.2f, %.2f, <%.2f,%.2f>\n", theta * j, wobbler, vecs[i][j].x(), vecs[i][j].y());
 
             blobsTarget[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
             blobsTarget[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
-            // printf("<P>: <%.2f, %.2f>\n", blobsTarget[i][j].x(), blobsTarget[i][j].y());
 
             if (!fastforward) continue;
             blobs[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
@@ -219,15 +223,16 @@ void ThermalComponent::update() {
         for (size_t j = 0; j < verticeCount; j++) {
             blobs[i][j].x(blobs[i][j].x() + (blobsTarget[i][j].x() - blobs[i][j].x()) * 0.1f);
             blobs[i][j].y(blobs[i][j].y() + (blobsTarget[i][j].y() - blobs[i][j].y()) * 0.1f);
+            radi[i][j] = radi[i][j] + (radiTarget[i][j] - radi[i][j]) * 0.005f;
         }
 
         blobs[i][verticeCount].x(blobs[i][verticeCount].x() + (blobsTarget[i][verticeCount].x() - blobs[i][verticeCount].x()) * 0.1f);
         blobs[i][verticeCount].y(blobs[i][verticeCount].y() + (blobsTarget[i][verticeCount].y() - blobs[i][verticeCount].y()) * 0.1f);
     }
 
-    if (rotator++ < 20.0) return;
+    // if (rotator++ < 20.0) return;
     computeTarget();
-    rotator = 0.0;
+    // rotator = 0.0;
 }
 
 void ThermalComponent::resized() {}

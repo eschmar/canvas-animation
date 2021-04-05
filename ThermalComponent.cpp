@@ -54,9 +54,6 @@ void ThermalComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     g.fillAll(gradientFrom);
 
-    u_int8_t r1 = gradientFrom.getRed(), g1 = gradientFrom.getGreen(), b1 = gradientFrom.getBlue();
-    u_int8_t r2 = gradientTo.getRed(), g2 = gradientTo.getGreen(), b2 = gradientTo.getBlue();
-
     float roundness = 1.1f;
     size_t pointCount = blobs.size();
 
@@ -93,9 +90,9 @@ void ThermalComponent::paint(juce::Graphics& g) {
         float percent = (float) i / (pointCount - 1);
 
         g.setColour(juce::Colour(
-            (u_int8_t) (r1 * percent + r2 * (1.0f - percent)),
-            (u_int8_t) (g1 * percent + g2 * (1.0f - percent)),
-            (u_int8_t) (b1 * percent + b2 * (1.0f - percent))
+            (u_int8_t) (gradientFrom.getRed() * percent + gradientTo.getRed() * (1.0f - percent)),
+            (u_int8_t) (gradientFrom.getGreen() * percent + gradientTo.getGreen() * (1.0f - percent)),
+            (u_int8_t) (gradientFrom.getBlue() * percent + gradientTo.getBlue() * (1.0f - percent))
         ));
 
         g.fillPath(blob);

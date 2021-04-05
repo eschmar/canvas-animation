@@ -44,6 +44,7 @@ private:
     juce::Colour gradientFrom, gradientTo;
 
     void computeTarget(bool fastforward = false);
+    float calculateBezierDistance(const float radius);
     juce::Path drawBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount = 3, float roundness = 1.0f, bool wobbling = true);
 
     // Your private member variables go here...

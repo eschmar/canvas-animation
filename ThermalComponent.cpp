@@ -31,6 +31,25 @@ ThermalComponent::ThermalComponent(
     computeTarget(true);
 }
 
+/**
+ * Calculate distance to the point of intersection for two tangents, making
+ * use of the fact that the first intersection will be on (center.x() + radius).
+ */
+float ThermalComponent::calculateBezierDistance(float radius) {
+    // Angle in radians between each point.
+    float theta = (float) (M_PI * 2.0 / blobs.size());
+
+    float vx = std::cos(theta);
+    float vy = std::sin(theta);
+    float px = position.x() + radius * vx;
+    float py = position.x() + radius * vy;
+
+    float t = (position.x() + radius - px) / vy;
+    float s = py - t * vx;
+
+    return Point<float>::distance(px, py, position.x() + radius, s);
+}
+
 void ThermalComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     g.fillAll(gradientFrom);
@@ -42,20 +61,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
     size_t pointCount = blobs.size();
 
     for (size_t i = pointCount - 1; i < pointCount; --i) {
-        // Angle in radians between each point.
-        float theta = (float) (M_PI * 2.0 / pointCount);
-
-        // Calculate distance to the point of intersection for two tangents, making
-        // use of the fact that the first intersection will be on (center.x() + radius).
-        float baseRadius = minRadius + (stepSize * i);
-        float vx = std::cos(theta);
-        float vy = std::sin(theta);
-        float px = position.x() + baseRadius * vx;
-        float py = position.x() + baseRadius * vy;
-
-        float t = (position.x() + baseRadius - px) / vy;
-        float s = py - t * vx;
-        float bezierDistance = Point<float>::distance(px, py, position.x() + baseRadius, s) * roundness;
+        // Determines roundness of blob path
+        float bezierDistance = calculateBezierDistance(minRadius + (stepSize * i)) * roundness;
 
         // Start the bezier path.
         juce::Path blob;

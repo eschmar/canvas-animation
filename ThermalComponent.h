@@ -40,7 +40,7 @@ private:
     std::vector<std::vector<float>> radi, radiTarget;
     size_t verticeCount = 6;
 
-    float relX, relY, wobbler, rotator, stepSize, blobSize, minRadius;
+    float relX, relY, wobbler, stepSize, blobSize, minRadius;
     juce::Colour gradientFrom, gradientTo;
 
     void computeTarget(bool fastforward = false);

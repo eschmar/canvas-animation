@@ -230,9 +230,7 @@ void ThermalComponent::update() {
         blobs[i][verticeCount].y(blobs[i][verticeCount].y() + (blobsTarget[i][verticeCount].y() - blobs[i][verticeCount].y()) * 0.1f);
     }
 
-    // if (rotator++ < 20.0) return;
     computeTarget();
-    // rotator = 0.0;
 }
 
 void ThermalComponent::resized() {}

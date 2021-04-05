@@ -80,6 +80,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
             blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, blobs[i][j].x(), blobs[i][j].y());
         }
 
+        // The most inner (last) blob should be special colour
         if (i == 0) {
             g.setColour(baseColor);
             g.fillPath(blob);
@@ -163,8 +164,6 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
     // y = ½ √( 2 + 2v√2 - u² + v² ) - ½ √( 2 - 2v√2 - u² + v² )
     float squareY = (float) (0.5 * std::sqrt(termy1) - 0.5 * std::sqrt(termy2));
     relY = (squareY + 1.0f) * 0.5f;
-
-    computeTarget();
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
@@ -172,7 +171,6 @@ void ThermalComponent::computeTarget(bool fastforward) {
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
-    // size_t i = 0;
 
     for (size_t i = 0; i < blobs.size(); i++) {
         // Evenly lay out points on the circle.
@@ -232,11 +230,7 @@ void ThermalComponent::update() {
     rotator = 0.0;
 }
 
-void ThermalComponent::resized() {
-    // This is called when the ThermalComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
-}
+void ThermalComponent::resized() {}
 
 juce::Path ThermalComponent::drawBlob(juce::Graphics& g, Point<float>& center, float radius, size_t pointCount, float roundness, bool wobbling) {
     float pointRadius = 3.0f;

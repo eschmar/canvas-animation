@@ -28,7 +28,6 @@ ThermalComponent::ThermalComponent(
     vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
 
     wobbler = (float) 0.0f;
-    rotator = (float) 0.0f;
     computeTarget(true);
 }
 
@@ -168,6 +167,8 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
+    float halfSize = size * 0.5f;
+
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
 
@@ -178,11 +179,30 @@ void ThermalComponent::computeTarget(bool fastforward) {
     wobbler += 0.002f;
 
     for (size_t i = 0; i < blobs.size(); i++) {
+        // Add perspective to blobs by offsetting the position slightly
+        float distance = position.distance(Point<float>(halfSize, halfSize));
+        float distanceRatio = distance / (size - inset) * 0.5f; // ratio to max radius
+        float percent = (float) i / blobs.size();
+
+        // normalised
+        float nx = (position.x() - halfSize) / distance;
+        float ny = (position.y() - halfSize) / distance;
+
+        float perspX = halfSize + nx * distance * (1.0 - percent);
+        float perspY = halfSize + ny * distance * (1.0 - percent);
+
+        // Avoid divide by zero, which will break tweening
+        if (distance == 0) {
+            perspX = position.x();
+            perspY = position.y();
+        }
+
         // Evenly lay out points on the circle.
         for (size_t j = 0; j < verticeCount; j++) {
             float radius = minRadius + (stepSize * i);
 
             if (shouldRandomiseRadius) {
+                // TODO: Improve radius calc
                 // Radnomise radius to generate different blobs.
                 radiTarget[i][j] = radius + (stepSize * 0.4) * (juce::Random::getSystemRandom().nextFloat() - 0.5);
                 if (fastforward) radi[i][j] = radiTarget[i][j];
@@ -190,14 +210,13 @@ void ThermalComponent::computeTarget(bool fastforward) {
 
             vecs[i][j].x(std::cos(theta * j + wobbler));
             vecs[i][j].y(std::sin(theta * j + wobbler));
-            // printf(">>> %.2f, %.2f, <%.2f,%.2f>\n", theta * j, wobbler, vecs[i][j].x(), vecs[i][j].y());
 
-            blobsTarget[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
-            blobsTarget[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
+            blobsTarget[i][j].x(perspX + radi[i][j] * vecs[i][j].x());
+            blobsTarget[i][j].y(perspY + radi[i][j] * vecs[i][j].y());
 
             if (!fastforward) continue;
-            blobs[i][j].x(position.x() + radi[i][j] * vecs[i][j].x());
-            blobs[i][j].y(position.y() + radi[i][j] * vecs[i][j].y());
+            blobs[i][j].x(perspX + radi[i][j] * vecs[i][j].x());
+            blobs[i][j].y(perspY + radi[i][j] * vecs[i][j].y());
         }
 
         // Close the path by adding the first point at the end again.

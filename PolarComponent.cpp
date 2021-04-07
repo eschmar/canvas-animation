@@ -7,6 +7,11 @@ PolarComponent::PolarComponent(
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond(144);
+
+    position.x(size * 0.5f);
+    position.y(size * 0.5f);
+    target.x(size * 0.5f);
+    target.y(size * 0.5f);
 }
 
 void PolarComponent::paint(juce::Graphics& g) {
@@ -15,8 +20,18 @@ void PolarComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     g.fillAll(baseColor);
 
+    // Boreder ellipse
+    g.setColour(juce::Colour(0xaae8eb34));
+    g.drawEllipse(
+        halfInset,
+        halfInset,
+        getWidth() - inset,
+        getHeight() - inset,
+        3.0
+    );
+
     // Cursor
-    g.setColour(juce::Colour(0xDD00aa11));
+    g.setColour(juce::Colour(0xffe8eb34));
     g.drawLine(juce::Line<float>(position.x() - 10.0f, position.y(), position.x() + 10.0f, position.y()));
     g.drawLine(juce::Line<float>(position.x(), position.y() - 10.0f, position.x(), position.y() + 10.0f));
 
@@ -32,19 +47,13 @@ void PolarComponent::paint(juce::Graphics& g) {
         halfSize + radius * std::sin(theta)
     );
 
-    g.setColour(juce::Colour(0xDDaa1100));
+    g.setColour(juce::Colour(0xfffc0f5e));
     g.drawLine(juce::Line<float>(projection.x() - 10.0f, projection.y(), projection.x() + 10.0f, projection.y()));
     g.drawLine(juce::Line<float>(projection.x(), projection.y() - 10.0f, projection.x(), projection.y() + 10.0f));
 
-    // Boreder ellipse
-    g.setColour(juce::Colour(0x3300aa11));
-    g.drawEllipse(
-        halfInset,
-        halfInset,
-        getWidth() - inset,
-        getHeight() - inset,
-        3.0
-    );
+    // Ray from origin
+    g.setColour(juce::Colour(0x77fc0f5e));
+    g.drawLine(juce::Line<float>(halfSize, halfSize, projection.x(), projection.y()), 3.0);
 }
 
 void PolarComponent::mouseDrag(const juce::MouseEvent& event) {

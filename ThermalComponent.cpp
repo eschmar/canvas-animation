@@ -181,15 +181,12 @@ void ThermalComponent::computeTarget(bool fastforward) {
     for (size_t i = 0; i < blobs.size(); i++) {
         // Add perspective to blobs by offsetting the position slightly
         float distance = position.distance(Point<float>(halfSize, halfSize));
-        float distanceRatio = distance / (size - inset) * 0.5f; // ratio to max radius
-        float percent = (float) i / blobs.size();
+        float beta = std::atan((position.y() - halfSize) / (position.x() - halfSize));
+        if (position.x() < halfSize) beta += (float) M_PI; // Adjust theta depending on quadrant
 
-        // normalised
-        float nx = (position.x() - halfSize) / distance;
-        float ny = (position.y() - halfSize) / distance;
-
-        float perspX = halfSize + nx * distance * (1.0 - percent);
-        float perspY = halfSize + ny * distance * (1.0 - percent);
+        float offset = i * stepSize * 3 * (distance / (size - inset) * 0.5f); // The farther from origin the more offset
+        float perspX = halfSize + (distance - offset) * std::cos(beta);
+        float perspY = halfSize + (distance - offset) * std::sin(beta);
 
         // Avoid divide by zero, which will break tweening
         if (distance == 0) {

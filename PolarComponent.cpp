@@ -36,12 +36,12 @@ void PolarComponent::paint(juce::Graphics& g) {
     g.drawLine(juce::Line<float>(position.x(), position.y() - 10.0f, position.x(), position.y() + 10.0f));
 
     // Project Point onto ellipse
-    float radius = (size - inset) / 2.0;
     float theta = std::atan((position.y() - halfSize) / (position.x() - halfSize));
 
     // Adjust theta depending on quadrant
-    if (position.x() < halfSize) theta += M_PI;
+    if (position.x() < halfSize) theta += (float) M_PI;
 
+    float radius = (size - inset) / 2.0f;
     Point<float> projection = Point<float>(
         halfSize + radius * std::cos(theta),
         halfSize + radius * std::sin(theta)
@@ -62,7 +62,7 @@ void PolarComponent::mouseDrag(const juce::MouseEvent& event) {
     float distance = (float) std::sqrt(std::pow(event.x - center, 2) + std::pow(event.y - center, 2));
 
     // Limit movement to circle
-    /* if (float ratio = distance / radius; ratio > 1.0) {
+    if (float ratio = distance / radius; ratio > 1.0) {
         float deltaX = event.x - center;
         float deltaY = event.y - center;
 
@@ -70,7 +70,7 @@ void PolarComponent::mouseDrag(const juce::MouseEvent& event) {
         target.x(center + (deltaX / length) * radius);
         target.y(center + (deltaY / length) * radius);
         return;
-    } */
+    }
 
     target.x(event.x);
     target.y(event.y);

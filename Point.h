@@ -15,7 +15,7 @@ public:
     void y(T y) { _y = y; }
 
     T distance(Point<T> p) {
-        return std::sqrt(std::pow(_x - p.x(), 2) + std::pow(_y - p.y(), 2));
+        return (T) std::sqrt(std::pow(_x - p.x(), 2) + std::pow(_y - p.y(), 2));
     }
 
     static T distance(Point<T> a, Point<T> b) {

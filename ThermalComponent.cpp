@@ -99,18 +99,17 @@ void ThermalComponent::paint(juce::Graphics& g) {
         g.fillPath(blob);
     }
 
-    // // Create illusion of a hole
-    /* juce::Path hole;
+    // Create illusion of a hole
     float halfInset = inset * 0.5f;
+    // float ringStrokeWidth = 2;
+    float ringOffset = 8;
 
+    juce::Path hole;
     hole.addRectangle(juce::Rectangle<int>(0, 0, getWidth(), getHeight()));
     hole.setUsingNonZeroWinding(false);
 
-    float ringOffset = 8;
-    float ringStrokeWidth = 2;
-
-    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
-    hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
+    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset, halfInset - ringOffset, getWidth() - inset + ringOffset * 2, getHeight() - inset + ringOffset * 2));
+    // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
     hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
 
     g.setColour(baseColor);
@@ -119,7 +118,17 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // Cursor
     g.setColour(gradientFrom);
     g.drawLine(juce::Line<float>(target.x() - 10.0f, target.y(), target.x() + 10.0f, target.y()));
-    g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f)); */
+    g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f));
+
+    // Simple one-coloured outer ring
+    g.setColour(gradientFrom);
+    g.drawEllipse(
+        halfInset - ringOffset,
+        halfInset - ringOffset,
+        getWidth() - inset + ringOffset * 2,
+        getHeight() - inset + ringOffset * 2,
+        3.0
+    );
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {

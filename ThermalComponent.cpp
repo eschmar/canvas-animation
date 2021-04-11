@@ -10,7 +10,8 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
-    setFramesPerSecond(144);
+    setFramesPerSecond(1);
+    // TODO: calculate rotation speed using fps as base
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -24,8 +25,14 @@ ThermalComponent::ThermalComponent(
     blobsTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
     radi.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
     radiTarget.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
-
     vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+
+
+    // blobPos.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    // blobTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    blobRadius.resize((size_t) verticeCount + 1);
+    blobRadiusTarget.resize((size_t) verticeCount + 1);
+    epsilon = 0.5;
 
     wobbler = (float) 0.0f;
     computeTarget(true);
@@ -52,12 +59,83 @@ float ThermalComponent::calculateBezierDistance(float radius) {
 
 void ThermalComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
-    g.fillAll(gradientFrom);
+    // g.fillAll(gradientFrom);
+    g.fillAll(baseColor);
 
-    float roundness = 1.1f;
+    // float roundness = 1.1f;
+    float roundness = 0.6f;
     size_t pointCount = blobs.size();
+    // pointCount = 1;
+
+    // Angle in radians between each point.
+    float theta = (float) (M_PI * 2.0 / verticeCount);
+
+    float halfSize = size * 0.5f;
+    float radius = blobSize;
 
     for (size_t i = pointCount - 1; i < pointCount; --i) {
+        // printf(">>> i\n");
+        juce::Path blob;
+
+        radius = blobSize + (stepSize * i);
+        float bezierDistance = calculateBezierDistance(radius) * roundness;
+
+        float prevX = position.x() + radius * std::cos(0);
+        float prevY = position.y() + radius * std::sin(0);
+
+        blob.startNewSubPath(juce::Point<float>(prevX, prevY));
+
+        for (size_t j = 1; j < blobRadius.size() + 1; j++) {
+            // polar to cartesian vector
+            float vx = std::cos(theta * j);
+            float vy = std::sin(theta * j);
+
+            // next point position
+            float px = position.x() + radius * vx;
+            float py = position.y() + radius * vy;
+
+            // Bezier points using perpendicular vector [-vy, vx].
+            // Calculate bezier points for the previous point.
+            float bezierX1 = prevX - std::sin(theta * (j - 1)) * bezierDistance;
+            float bezierY1 = prevY - (-1.0f * std::cos(theta * (j - 1))) * bezierDistance;
+
+            // Calculate bezier points for the target point.
+            float bezierX2 = px + vy * bezierDistance;
+            float bezierY2 = py + (-1.0f * vx) * bezierDistance;
+
+            blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, px, py);
+
+            prevX = px;
+            prevY = py;
+
+            // printf(">>> j at <%.2f, %.2f>\n", px, py);
+
+            if (j == 1) {
+                g.setColour(juce::Colour(0x77aa1100));
+                g.fillEllipse(bezierX1 - 5, bezierY1 - 5, 10, 10);
+                g.fillEllipse(bezierX2 - 5, bezierY2 - 5, 10, 10);
+
+                g.setColour(juce::Colour(0x770011aa));
+                g.fillEllipse(px - 5, py - 5, 10, 10);
+            }
+        }
+
+        // blob.lineTo(px, py);
+
+        // Calculate next colour in gradient.
+        float percent = (float) i / (pointCount - 1);
+
+        // g.setColour(juce::Colour(
+        //     (u_int8_t) (gradientFrom.getRed() * percent + gradientTo.getRed() * (1.0f - percent)),
+        //     (u_int8_t) (gradientFrom.getGreen() * percent + gradientTo.getGreen() * (1.0f - percent)),
+        //     (u_int8_t) (gradientFrom.getBlue() * percent + gradientTo.getBlue() * (1.0f - percent))
+        // ));
+
+        g.setColour(i % 2 == 0 ? juce::Colour(0x220011aa) : juce::Colour(0x22aa1100));
+        g.fillPath(blob);
+    }
+
+    /* for (size_t i = pointCount - 1; i < pointCount; --i) {
         // Determines roundness of blob path
         float bezierDistance = calculateBezierDistance(minRadius + (stepSize * i)) * roundness;
 
@@ -78,6 +156,14 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
             // blob.lineTo(pointX, pointY);
             blob.cubicTo(bezierX1, bezierY1, bezierX2, bezierY2, blobs[i][j].x(), blobs[i][j].y());
+
+            if (i == 0) {
+                g.setColour(juce::Colour(0x77aa1100));
+                g.fillEllipse(bezierX1 - 5, bezierY1 - 5, 10, 10);
+                g.fillEllipse(bezierX2 - 5, bezierY2 - 5, 10, 10);
+                g.setColour(juce::Colour(0x770011aa));
+                g.fillEllipse(blobs[i][j].x() - 5, blobs[i][j].y() - 5, 10, 10);
+            }
         }
 
         // The most inner (last) blob should be special colour
@@ -112,23 +198,23 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
     hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
 
-    g.setColour(baseColor);
-    g.fillPath(hole);
-
-    // Cursor
-    g.setColour(gradientFrom);
-    g.drawLine(juce::Line<float>(target.x() - 10.0f, target.y(), target.x() + 10.0f, target.y()));
-    g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f));
+    g.setColour(baseColor); */
+    // g.fillPath(hole);
 
     // Simple one-coloured outer ring
-    g.setColour(gradientFrom);
-    g.drawEllipse(
-        halfInset - ringOffset,
-        halfInset - ringOffset,
-        getWidth() - inset + ringOffset * 2,
-        getHeight() - inset + ringOffset * 2,
-        3.0
-    );
+    // g.setColour(gradientFrom);
+    // g.drawEllipse(
+    //     halfInset - ringOffset,
+    //     halfInset - ringOffset,
+    //     getWidth() - inset + ringOffset * 2,
+    //     getHeight() - inset + ringOffset * 2,
+    //     3.0
+    // );
+
+    // Cursor
+    // g.setColour(gradientFrom);
+    // g.drawLine(juce::Line<float>(target.x() - 10.0f, target.y(), target.x() + 10.0f, target.y()));
+    // g.drawLine(juce::Line<float>(target.x(), target.y() - 10.0f, target.x(), target.y() + 10.0f));
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
@@ -176,13 +262,20 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
+    // Periodically randomise blob radius slightly.
+    bool shouldRandomiseRadius = fmod(getFrameCounter(), 48) == 0;
+
+    if (shouldRandomiseRadius) {
+        for (size_t i = 0; i < blobRadiusTarget.size(); i++) {
+            blobRadiusTarget[i] = juce::Random::getSystemRandom().nextFloat() * epsilon;
+            if (fastforward) blobRadius[i] = blobRadiusTarget[i];
+        }
+    }
+
     float halfSize = size * 0.5f;
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
-
-    // Periodically randomise blob radius slightly.
-    bool shouldRandomiseRadius = fmod(getFrameCounter(), 48) == 0;
 
     // Add slow rotation.
     wobbler += 0.002f;
@@ -205,6 +298,8 @@ void ThermalComponent::computeTarget(bool fastforward) {
 
         // Evenly lay out points on the circle.
         for (size_t j = 0; j < verticeCount; j++) {
+            // Rewrite this section with polar coordinates. maybe also replace above, just use one theta, not beta.
+
             float radius = minRadius + (stepSize * i);
 
             if (shouldRandomiseRadius) {

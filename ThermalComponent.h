@@ -43,6 +43,7 @@ private:
     std::vector<float> blobRadius, blobRadiusTarget;
 
     size_t verticeCount = 6;
+    size_t blobCount;
 
     float relX, relY, wobbler, stepSize, blobSize, minRadius, epsilon;
     juce::Colour gradientFrom, gradientTo;

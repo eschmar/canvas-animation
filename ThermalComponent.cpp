@@ -19,14 +19,13 @@ ThermalComponent::ThermalComponent(
     gradientTo = gradientTo_;
     minRadius = 48.0;
 
-    size_t blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
+    blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
 
-    blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
-    blobsTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
-    radi.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
-    radiTarget.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
-    vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
-
+    // blobs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    // blobsTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
+    // radi.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
+    // radiTarget.resize((size_t) blobCount, std::vector<float>((size_t) verticeCount + 1));
+    // vecs.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
 
     // blobPos.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
     // blobTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
@@ -44,7 +43,7 @@ ThermalComponent::ThermalComponent(
  */
 float ThermalComponent::calculateBezierDistance(float radius) {
     // Angle in radians between each point.
-    float theta = (float) (M_PI * 2.0 / blobs.size());
+    float theta = (float) (M_PI * 2.0 / blobCount);
 
     float vx = std::cos(theta);
     float vy = std::sin(theta);
@@ -64,7 +63,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
     // float roundness = 1.1f;
     float roundness = 0.6f;
-    size_t pointCount = blobs.size();
+    size_t pointCount = blobCount;
     pointCount = 1;
 
     // Angle in radians between each point.
@@ -347,16 +346,16 @@ void ThermalComponent::update() {
     }
 
     // blob radi tweening
-    for (size_t i = 0; i < blobs.size(); i++) {
-        for (size_t j = 0; j < verticeCount; j++) {
-            blobs[i][j].x(blobs[i][j].x() + (blobsTarget[i][j].x() - blobs[i][j].x()) * 0.1f);
-            blobs[i][j].y(blobs[i][j].y() + (blobsTarget[i][j].y() - blobs[i][j].y()) * 0.1f);
-            radi[i][j] = radi[i][j] + (radiTarget[i][j] - radi[i][j]) * 0.005f;
-        }
+    // for (size_t i = 0; i < blobs.size(); i++) {
+    //     for (size_t j = 0; j < verticeCount; j++) {
+    //         blobs[i][j].x(blobs[i][j].x() + (blobsTarget[i][j].x() - blobs[i][j].x()) * 0.1f);
+    //         blobs[i][j].y(blobs[i][j].y() + (blobsTarget[i][j].y() - blobs[i][j].y()) * 0.1f);
+    //         radi[i][j] = radi[i][j] + (radiTarget[i][j] - radi[i][j]) * 0.005f;
+    //     }
 
-        blobs[i][verticeCount].x(blobs[i][verticeCount].x() + (blobsTarget[i][verticeCount].x() - blobs[i][verticeCount].x()) * 0.1f);
-        blobs[i][verticeCount].y(blobs[i][verticeCount].y() + (blobsTarget[i][verticeCount].y() - blobs[i][verticeCount].y()) * 0.1f);
-    }
+    //     blobs[i][verticeCount].x(blobs[i][verticeCount].x() + (blobsTarget[i][verticeCount].x() - blobs[i][verticeCount].x()) * 0.1f);
+    //     blobs[i][verticeCount].y(blobs[i][verticeCount].y() + (blobsTarget[i][verticeCount].y() - blobs[i][verticeCount].y()) * 0.1f);
+    // }
 
     computeTarget();
 }

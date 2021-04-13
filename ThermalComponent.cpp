@@ -95,8 +95,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
             float px = position.x() + radius * vx;
             float py = position.y() + radius * vy;
 
-            g.setColour(juce::Colour(0x7709e6ed));
-            g.fillEllipse(px - 5, py - 5, 10, 10);
+            // g.setColour(juce::Colour(0x7709e6ed));
+            // g.fillEllipse(px - 5, py - 5, 10, 10);
 
             // Bezier points using perpendicular vector [-vy, vx].
             // Calculate bezier points for the previous point.
@@ -112,14 +112,14 @@ void ThermalComponent::paint(juce::Graphics& g) {
             prevX = px;
             prevY = py;
 
-            if (j == blobRadius.size() - 1) {
-                g.setColour(juce::Colour(0x77aa1100));
-                g.fillEllipse(bezierX1 - 5, bezierY1 - 5, 10, 10);
-                g.fillEllipse(bezierX2 - 5, bezierY2 - 5, 10, 10);
+            // if (j == blobRadius.size() - 1) {
+            //     g.setColour(juce::Colour(0x77aa1100));
+            //     g.fillEllipse(bezierX1 - 5, bezierY1 - 5, 10, 10);
+            //     g.fillEllipse(bezierX2 - 5, bezierY2 - 5, 10, 10);
 
-                g.setColour(juce::Colour(0x770011aa));
-                g.fillEllipse(px - 5, py - 5, 10, 10);
-            }
+            //     g.setColour(juce::Colour(0x770011aa));
+            //     g.fillEllipse(px - 5, py - 5, 10, 10);
+            // }
         }
 
         // blob.lineTo(px, py);
@@ -275,7 +275,7 @@ void ThermalComponent::computeTarget(bool fastforward) {
         }
     }
 
-    float halfSize = size * 0.5f;
+    /* float halfSize = size * 0.5f;
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
@@ -333,7 +333,7 @@ void ThermalComponent::computeTarget(bool fastforward) {
             blobs[i][verticeCount].x(blobs[i][0].x());
             blobs[i][verticeCount].y(blobs[i][0].y());
         }
-    }
+    } */
 }
 
 void ThermalComponent::update() {

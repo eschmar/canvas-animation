@@ -20,7 +20,7 @@ public:
         int inset_ = 96,
         int fps_ = 60,
         float stepSize_ = 36.0,
-        float blobSize_ = 38.0,
+        float blobSize_ = 88.0,
         juce::Colour gradientFrom_ = juce::Colour(194, 32, 19),
         juce::Colour gradientTo_ = juce::Colour(255, 155, 0)
 

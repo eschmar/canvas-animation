@@ -10,7 +10,7 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
-    setFramesPerSecond(1);
+    setFramesPerSecond(60);
     // TODO: calculate rotation speed using fps as base
 
     stepSize = stepSize_;
@@ -32,7 +32,7 @@ ThermalComponent::ThermalComponent(
     // blobTarget.resize((size_t) blobCount, std::vector<Point<float>>((size_t) verticeCount + 1));
     blobRadius.resize((size_t) verticeCount + 1);
     blobRadiusTarget.resize((size_t) verticeCount + 1);
-    epsilon = 0.5;
+    epsilon = 0.8f;
 
     wobbler = (float) 0.0f;
     computeTarget(true);
@@ -65,27 +65,28 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // float roundness = 1.1f;
     float roundness = 0.6f;
     size_t pointCount = blobs.size();
-    // pointCount = 1;
+    pointCount = 1;
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
 
-    float halfSize = size * 0.5f;
-    float radius = blobSize;
-
     for (size_t i = pointCount - 1; i < pointCount; --i) {
-        // printf(">>> i\n");
         juce::Path blob;
 
-        radius = blobSize + (stepSize * i);
+        float radius = (blobSize + (stepSize * i)) * (1.0f - epsilon * (1.0f - ((float) i / pointCount)) * blobRadius[0]);
         float bezierDistance = calculateBezierDistance(radius) * roundness;
 
-        float prevX = position.x() + radius * std::cos(0);
-        float prevY = position.y() + radius * std::sin(0);
+        float prevX = position.x() + radius * (float) std::cos(0);
+        float prevY = position.y() + radius * (float) std::sin(0);
+
+        // g.setColour(juce::Colour(0x77ed6809));
+        // g.fillEllipse(prevX - 5, prevY - 5, 10, 10);
 
         blob.startNewSubPath(juce::Point<float>(prevX, prevY));
 
-        for (size_t j = 1; j < blobRadius.size() + 1; j++) {
+        for (size_t j = 1; j < blobRadius.size(); j++) {
+            radius = (blobSize + (stepSize * i)) * (1.0f - epsilon * (1.0f - ((float) i / pointCount)) * blobRadius[j]);
+
             // polar to cartesian vector
             float vx = std::cos(theta * j);
             float vy = std::sin(theta * j);
@@ -93,6 +94,9 @@ void ThermalComponent::paint(juce::Graphics& g) {
             // next point position
             float px = position.x() + radius * vx;
             float py = position.y() + radius * vy;
+
+            g.setColour(juce::Colour(0x7709e6ed));
+            g.fillEllipse(px - 5, py - 5, 10, 10);
 
             // Bezier points using perpendicular vector [-vy, vx].
             // Calculate bezier points for the previous point.
@@ -108,9 +112,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
             prevX = px;
             prevY = py;
 
-            // printf(">>> j at <%.2f, %.2f>\n", px, py);
-
-            if (j == 1) {
+            if (j == blobRadius.size() - 1) {
                 g.setColour(juce::Colour(0x77aa1100));
                 g.fillEllipse(bezierX1 - 5, bezierY1 - 5, 10, 10);
                 g.fillEllipse(bezierX2 - 5, bezierY2 - 5, 10, 10);
@@ -125,13 +127,13 @@ void ThermalComponent::paint(juce::Graphics& g) {
         // Calculate next colour in gradient.
         float percent = (float) i / (pointCount - 1);
 
-        // g.setColour(juce::Colour(
-        //     (u_int8_t) (gradientFrom.getRed() * percent + gradientTo.getRed() * (1.0f - percent)),
-        //     (u_int8_t) (gradientFrom.getGreen() * percent + gradientTo.getGreen() * (1.0f - percent)),
-        //     (u_int8_t) (gradientFrom.getBlue() * percent + gradientTo.getBlue() * (1.0f - percent))
-        // ));
+        g.setColour(juce::Colour(
+            (u_int8_t) (gradientFrom.getRed() * percent + gradientTo.getRed() * (1.0f - percent)),
+            (u_int8_t) (gradientFrom.getGreen() * percent + gradientTo.getGreen() * (1.0f - percent)),
+            (u_int8_t) (gradientFrom.getBlue() * percent + gradientTo.getBlue() * (1.0f - percent))
+        ));
 
-        g.setColour(i % 2 == 0 ? juce::Colour(0x220011aa) : juce::Colour(0x22aa1100));
+        // g.setColour(i % 2 == 0 ? juce::Colour(0xaadeed09) : juce::Colour(0x22aa1100));
         g.fillPath(blob);
     }
 
@@ -267,7 +269,8 @@ void ThermalComponent::computeTarget(bool fastforward) {
 
     if (shouldRandomiseRadius) {
         for (size_t i = 0; i < blobRadiusTarget.size(); i++) {
-            blobRadiusTarget[i] = juce::Random::getSystemRandom().nextFloat() * epsilon;
+            blobRadiusTarget[i] = juce::Random::getSystemRandom().nextFloat();
+            if (i == blobRadiusTarget.size() - 1) blobRadiusTarget[i] = blobRadiusTarget[0];
             if (fastforward) blobRadius[i] = blobRadiusTarget[i];
         }
     }
@@ -337,6 +340,11 @@ void ThermalComponent::update() {
     // basic cursor tweening
     position.x(position.x() + (target.x() - position.x()) * 0.1f);
     position.y(position.y() + (target.y() - position.y()) * 0.1f);
+
+    // epsiloning
+    for (size_t i = 0; i < blobRadius.size(); i++) {
+        blobRadius[i] = blobRadius[i] + (blobRadiusTarget[i] - blobRadius[i]) * 0.1f;
+    }
 
     // blob radi tweening
     for (size_t i = 0; i < blobs.size(); i++) {

@@ -78,8 +78,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
         float bezierDistance = calculateBezierDistance(radius) * roundness;
 
-        float prevX = position.x() + radius * (float) std::cos(0);
-        float prevY = position.y() + radius * (float) std::sin(0);
+        float prevX = position.x() + radius * (float) std::cos(0 + wobbler);
+        float prevY = position.y() + radius * (float) std::sin(0 + wobbler);
 
         // g.setColour(juce::Colour(0x77ed6809));
         // g.fillEllipse(prevX - 5, prevY - 5, 10, 10);
@@ -90,8 +90,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
             radius = baseRadius + (baseRadius * epsilon * (1.0f - percent) * (blobRadius[j] - 0.5f) * 2);
 
             // polar to cartesian vector
-            float vx = std::cos(theta * j);
-            float vy = std::sin(theta * j);
+            float vx = std::cos(theta * j + wobbler);
+            float vy = std::sin(theta * j + wobbler);
 
             // next point position
             float px = position.x() + radius * vx;
@@ -102,8 +102,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
 
             // Bezier points using perpendicular vector [-vy, vx].
             // Calculate bezier points for the previous point.
-            float bezierX1 = prevX - std::sin(theta * (j - 1)) * bezierDistance;
-            float bezierY1 = prevY - (-1.0f * std::cos(theta * (j - 1))) * bezierDistance;
+            float bezierX1 = prevX - std::sin(theta * (j - 1) + wobbler) * bezierDistance;
+            float bezierY1 = prevY - (-1.0f * std::cos(theta * (j - 1) + wobbler)) * bezierDistance;
 
             // Calculate bezier points for the target point.
             float bezierX2 = px + vy * bezierDistance;
@@ -136,6 +136,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
         ));
 
         // g.setColour(i % 2 == 0 ? juce::Colour(0xaadeed09) : juce::Colour(0x22aa1100));
+        // The most inner (last) blob should be special colour
+        if (i == 0) g.setColour(baseColor);
         g.fillPath(blob);
     }
 
@@ -278,13 +280,13 @@ void ThermalComponent::computeTarget(bool fastforward) {
         }
     }
 
+    // Add slow rotation.
+    wobbler += 0.002f;
+
     /* float halfSize = size * 0.5f;
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
-
-    // Add slow rotation.
-    wobbler += 0.002f;
 
     for (size_t i = 0; i < blobs.size(); i++) {
         // Add perspective to blobs by offsetting the position slightly
@@ -346,7 +348,7 @@ void ThermalComponent::update() {
 
     // epsiloning
     for (size_t i = 0; i < blobRadius.size(); i++) {
-        blobRadius[i] = blobRadius[i] + (blobRadiusTarget[i] - blobRadius[i]) * 0.1f;
+        blobRadius[i] = blobRadius[i] + (blobRadiusTarget[i] - blobRadius[i]) * 0.01f;
     }
 
     // blob radi tweening

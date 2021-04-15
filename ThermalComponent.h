@@ -20,7 +20,7 @@ public:
         int inset_ = 96,
         int fps_ = 60,
         float stepSize_ = 36.0,
-        float blobSize_ = 88.0,
+        float blobSize_ = 52.0,
         juce::Colour gradientFrom_ = juce::Colour(194, 32, 19),
         juce::Colour gradientTo_ = juce::Colour(255, 155, 0)
 
@@ -42,7 +42,7 @@ private:
     std::vector<std::vector<Point<float>>> blobPos, blobTarget;
     std::vector<float> blobRadius, blobRadiusTarget;
 
-    size_t verticeCount = 6;
+    size_t verticeCount = 5;
     size_t blobCount;
 
     float relX, relY, wobbler, stepSize, blobSize, minRadius, epsilon;

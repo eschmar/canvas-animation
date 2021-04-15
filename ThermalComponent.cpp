@@ -58,13 +58,13 @@ float ThermalComponent::calculateBezierDistance(float radius) {
 
 void ThermalComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
-    // g.fillAll(gradientFrom);
-    g.fillAll(baseColor);
+    g.fillAll(gradientFrom);
+    // g.fillAll(baseColor);
 
-    // float roundness = 1.1f;
-    float roundness = 0.6f;
+    float roundness = 1.1f;
+    // float roundness = 0.6f;
     size_t pointCount = blobCount;
-    pointCount = 1;
+    // pointCount = 1;
 
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
@@ -72,7 +72,10 @@ void ThermalComponent::paint(juce::Graphics& g) {
     for (size_t i = pointCount - 1; i < pointCount; --i) {
         juce::Path blob;
 
-        float radius = (blobSize + (stepSize * i)) * (1.0f - epsilon * (1.0f - ((float) i / pointCount)) * blobRadius[0]);
+        float percent = (float) i / (pointCount - 1);
+        float baseRadius = blobSize + (stepSize * i);
+        float radius = baseRadius + (baseRadius * epsilon * (1.0f - percent) * (blobRadius[0] - 0.5f) * 2);
+
         float bezierDistance = calculateBezierDistance(radius) * roundness;
 
         float prevX = position.x() + radius * (float) std::cos(0);
@@ -84,7 +87,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
         blob.startNewSubPath(juce::Point<float>(prevX, prevY));
 
         for (size_t j = 1; j < blobRadius.size(); j++) {
-            radius = (blobSize + (stepSize * i)) * (1.0f - epsilon * (1.0f - ((float) i / pointCount)) * blobRadius[j]);
+            radius = baseRadius + (baseRadius * epsilon * (1.0f - percent) * (blobRadius[j] - 0.5f) * 2);
 
             // polar to cartesian vector
             float vx = std::cos(theta * j);
@@ -124,7 +127,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
         // blob.lineTo(px, py);
 
         // Calculate next colour in gradient.
-        float percent = (float) i / (pointCount - 1);
+        // float percent = (float) i / (pointCount - 1);
 
         g.setColour(juce::Colour(
             (u_int8_t) (gradientFrom.getRed() * percent + gradientTo.getRed() * (1.0f - percent)),
@@ -269,6 +272,7 @@ void ThermalComponent::computeTarget(bool fastforward) {
     if (shouldRandomiseRadius) {
         for (size_t i = 0; i < blobRadiusTarget.size(); i++) {
             blobRadiusTarget[i] = juce::Random::getSystemRandom().nextFloat();
+            // if (i % 2 == 0) blobRadiusTarget[i] = 1.0f - 0.2f * blobRadiusTarget[i];
             if (i == blobRadiusTarget.size() - 1) blobRadiusTarget[i] = blobRadiusTarget[0];
             if (fastforward) blobRadius[i] = blobRadiusTarget[i];
         }

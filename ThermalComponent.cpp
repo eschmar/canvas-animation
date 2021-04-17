@@ -224,19 +224,17 @@ void ThermalComponent::paint(juce::Graphics& g) {
 }
 
 void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
+    float halfSize = size * 0.5f;
     float radius = (size - inset) / 2.0f;
-    float center = size * 0.5f;
-    float distance = (float) std::sqrt(std::pow(event.x - center, 2) + std::pow(event.y - center, 2));
 
     // Limit movement to circle
-    if (float ratio = distance / radius; ratio > 1.0) {
-        float deltaX = event.x - center;
-        float deltaY = event.y - center;
+    if (Point<float>::distance(event.x, event.y, halfSize, halfSize) > radius) {
+        // Project Point onto ellipse, adjust theta depending on quadrant
+        float theta = std::atan((event.y - halfSize) / (event.x - halfSize));
+        if (event.x < halfSize) theta += (float) M_PI;
 
-        float length = (float) std::sqrt(std::pow(deltaX, 2.0) + std::pow(deltaY, 2.0));
-        target.x(center + (deltaX / length) * radius);
-        target.y(center + (deltaY / length) * radius);
-
+        target.x(halfSize + radius * std::cos(theta));
+        target.y(halfSize + radius * std::sin(theta));
     } else {
         target.x(event.x);
         target.y(event.y);
@@ -244,8 +242,8 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 
     // map coordinates to unit circle
     // http://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
-    float u = (float) (x - center) / radius;
-    float v = (float) (y - center) / radius;
+    float u = (float) (x - halfSize) / radius;
+    float v = (float) (y - halfSize) / radius;
 
     // convert circle to square
     double u2 = u * u;

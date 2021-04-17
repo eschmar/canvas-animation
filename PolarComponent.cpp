@@ -20,7 +20,7 @@ void PolarComponent::paint(juce::Graphics& g) {
     juce::Colour baseColor = getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId);
     g.fillAll(baseColor);
 
-    // Boreder ellipse
+    // Border ellipse
     g.setColour(juce::Colour(0xaae8eb34));
     g.drawEllipse(
         halfInset,

@@ -18,7 +18,7 @@ public:
     ThermalComponent(
         int size_,
         int inset_ = 96,
-        int fps_ = 60,
+        int fps_ = 144,
         float stepSize_ = 36.0,
         float blobSize_ = 52.0,
         juce::Colour gradientFrom_ = juce::Colour(194, 32, 19),

@@ -10,8 +10,8 @@ ThermalComponent::ThermalComponent(
     juce::Colour gradientTo_
 ) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
     setSize(size_, size_);
-    setFramesPerSecond(60);
-    // TODO: calculate rotation speed using fps as base
+    setFramesPerSecond(fps_);
+    fps = fps_;
 
     stepSize = stepSize_;
     blobSize = blobSize_;
@@ -201,10 +201,11 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 }
 
 void ThermalComponent::computeTarget(bool fastforward) {
-    // Periodically randomise blob radius slightly.
-    bool shouldRandomiseRadius = fmod(getFrameCounter(), 48) == 0;
+    // Periodically randomise blob radius slightly every ~0.8s.
+    int frameTrigger = (int) (0.8 / (1.0 / (double) fps));
+    bool shouldRandomise = fmod(getFrameCounter(), frameTrigger) == 0;
 
-    if (shouldRandomiseRadius) {
+    if (shouldRandomise) {
         for (size_t i = 0; i < blobRadiusTarget.size(); i++) {
             blobRadiusTarget[i] = juce::Random::getSystemRandom().nextFloat();
             // if (i % 2 == 0) blobRadiusTarget[i] = 1.0f - 0.2f * blobRadiusTarget[i];

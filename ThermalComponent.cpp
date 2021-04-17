@@ -126,7 +126,7 @@ void ThermalComponent::paint(juce::Graphics& g) {
         g.fillPath(blob);
     }
 
-    /* // Create illusion of a hole
+    // Create illusion of a hole
     float halfInset = inset * 0.5f;
     // float ringStrokeWidth = 2;
     float ringOffset = 8;
@@ -139,18 +139,23 @@ void ThermalComponent::paint(juce::Graphics& g) {
     // hole.addEllipse(juce::Rectangle<float>(halfInset - ringOffset + ringStrokeWidth, halfInset - ringOffset + ringStrokeWidth, getWidth() - inset + ringOffset * 2 - ringStrokeWidth * 2, getHeight() - inset + ringOffset * 2 - ringStrokeWidth * 2));
     hole.addEllipse(juce::Rectangle<float>(halfInset, halfInset, getWidth() - inset, getHeight() - inset));
 
-    g.setColour(baseColor); */
-    // g.fillPath(hole);
+    g.setColour(baseColor);
+    g.fillPath(hole);
 
     // Simple one-coloured outer ring
-    // g.setColour(gradientFrom);
-    // g.drawEllipse(
-    //     halfInset - ringOffset,
-    //     halfInset - ringOffset,
-    //     getWidth() - inset + ringOffset * 2,
-    //     getHeight() - inset + ringOffset * 2,
-    //     3.0
-    // );
+    g.setColour(juce::Colour(
+        (u_int8_t) (gradientFrom.getRed() * 0.5f + gradientTo.getRed() * 0.5f),
+        (u_int8_t) (gradientFrom.getGreen() * 0.5f + gradientTo.getGreen() * 0.5f),
+        (u_int8_t) (gradientFrom.getBlue() * 0.5f + gradientTo.getBlue() * 0.5f)
+    ));
+
+    g.drawEllipse(
+        halfInset - ringOffset,
+        halfInset - ringOffset,
+        getWidth() - inset + ringOffset * 2,
+        getHeight() - inset + ringOffset * 2,
+        3.0
+    );
 
     // Cursor
     // g.setColour(gradientFrom);

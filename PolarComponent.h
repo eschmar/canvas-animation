@@ -26,7 +26,6 @@ public:
     void update() override;
 
 private:
-    Point<float> position, target;
 
     // Your private member variables go here...
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolarComponent)

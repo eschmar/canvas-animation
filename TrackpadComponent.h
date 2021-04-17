@@ -5,6 +5,7 @@
 // have called `juce_generate_juce_header(<thisTarget>)` in your CMakeLists.txt,
 // you could `#include <JuceHeader.h>` here instead, to make all your module headers visible.
 #include <juce_gui_extra/juce_gui_extra.h>
+#include "Point.h"
 
 /**
  * Base component
@@ -19,11 +20,11 @@ public:
     void update() override;
 
 protected:
-    double x, y;
+    Point<float> position, target;
     int size, inset, fps;
+
     std::tuple<float, float> calculateRelativePosition(int pixelX, int pixelY);
     std::tuple<int, int> calculatePixelPosition(float relX, float relY);
-    double euclideanDistance(float x1, float y1, float x2, float y2);
 
 private:
     // Your private member variables go here...

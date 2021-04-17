@@ -1,10 +1,15 @@
 #include "TrackpadComponent.h"
 
-TrackpadComponent::TrackpadComponent(int size_, int inset_, int fps_) : size(size_), inset(inset_), fps(fps_) {
+TrackpadComponent::TrackpadComponent(
+    int size_,
+    int inset_,
+    int fps_
+) : size(size_), inset(inset_), fps(fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
-    x = getWidth() * 0.5f;
-    y = getHeight() * 0.5f;
+
+    position = Point<float>(size_ * 0.5f, size_ * 0.5f);
+    target = Point<float>(size_ * 0.5f, size_ * 0.5f);
 }
 
 void TrackpadComponent::paint(juce::Graphics& g) {
@@ -18,14 +23,15 @@ void TrackpadComponent::paint(juce::Graphics& g) {
     // Draggable circle
     float radius = 16;
     g.setColour(juce::Colours::yellow);
-    g.drawEllipse((float) x - radius, (float) y - radius, radius * 2, radius * 2, 3);
+    g.drawEllipse((float) position.x() - radius, (float) position.y() - radius, radius * 2, radius * 2, 3);
 }
 
 void TrackpadComponent::mouseDrag(const juce::MouseEvent& event) {
     std::tuple<float, float> relPos = calculateRelativePosition(event.x, event.y);
     std::tuple<float, float> absPos = calculatePixelPosition(std::get<0>(relPos), std::get<1>(relPos));
-    x = std::get<0>(absPos);
-    y = std::get<1>(absPos);
+
+    target.x(std::get<0>(absPos));
+    target.y(std::get<1>(absPos));
 }
 
 /**
@@ -63,13 +69,10 @@ std::tuple<int, int> TrackpadComponent::calculatePixelPosition(float relX, float
     };
 }
 
-double TrackpadComponent::euclideanDistance(float x1, float y1, float x2, float y2) {
-    return std::sqrt(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2));
-}
-
 void TrackpadComponent::update() {
-    // This function is called at the frequency specified by the setFramesPerSecond() call
-    // in the constructor. You can use it to update counters, animate values, etc.
+    // Basic cursor tweening
+    position.x(position.x() + (target.x() - position.x()) * 0.1f);
+    position.y(position.y() + (target.y() - position.y()) * 0.1f);
 }
 
 void TrackpadComponent::resized() {

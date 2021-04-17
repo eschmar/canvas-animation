@@ -7,11 +7,16 @@ GridTrackpadComponent::GridTrackpadComponent(
     float radius_,
     float gridSize_,
     float maxPointSize_
-) : TrackpadComponent(size_, inset_, fps_), radius(radius_), gridSize(gridSize_), maxPointSize(maxPointSize_) {
+) : TrackpadComponent(size_, inset_, fps_),
+    radius(radius_),
+    gridSize(gridSize_),
+    maxPointSize(maxPointSize_)
+{
     setSize(size_, size_);
     setFramesPerSecond (fps_);
-    x = getWidth() * 0.5f;
-    y = getHeight() * 0.5f;
+
+    position = Point<float>(size_ * 0.5f, size_ * 0.5f);
+    target = Point<float>(size_ * 0.5f, size_ * 0.5f);
 }
 
 void GridTrackpadComponent::paint(juce::Graphics& g) {
@@ -29,15 +34,15 @@ void GridTrackpadComponent::paint(juce::Graphics& g) {
                 if (centerY < (inset * 0.5) || centerY > getHeight() - (inset * 0.5)) continue;
             }
 
-            double distance = euclideanDistance(centerX, centerY, (float) x, (float) y);
+            double distance = Point<float>::distance(centerX, centerY, position.x(), position.y());
             double ratio = distance / radius;
 
             int posX = centerX;
             int posY = centerY;
 
             if (ratio <= 1) {
-                posX = posX - ((int) ((x - posX) * (1.0 - ratio) * 0.5));
-                posY = posY - ((int) ((y - posY) * (1.0 - ratio) * 0.5));
+                posX = posX - ((int) ((position.x() - posX) * (1.0 - ratio) * 0.5));
+                posY = posY - ((int) ((position.y() - posY) * (1.0 - ratio) * 0.5));
             }
 
             // Scale individual point size between 2 and maxPointSize to introduce scaling effect.
@@ -48,12 +53,9 @@ void GridTrackpadComponent::paint(juce::Graphics& g) {
 }
 
 void GridTrackpadComponent::update() {
-    // This function is called at the frequency specified by the setFramesPerSecond() call
-    // in the constructor. You can use it to update counters, animate values, etc.
+    // Basic cursor tweening
+    position.x(position.x() + (target.x() - position.x()) * 0.2f);
+    position.y(position.y() + (target.y() - position.y()) * 0.2f);
 }
 
-void GridTrackpadComponent::resized() {
-    // This is called when the GridTrackpadComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
-}
+void GridTrackpadComponent::resized() {}

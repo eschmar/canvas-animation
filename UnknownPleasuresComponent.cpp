@@ -22,7 +22,7 @@ UnknownPleasuresComponent::UnknownPleasuresComponent(
     target.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
     computeTarget(true);
 
-    start = std::chrono::duration_cast<std::chrono::milliseconds>(
+    start = (uint64_t) std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
     ).count();
 }
@@ -101,9 +101,9 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
 void UnknownPleasuresComponent::update() {
     // TODO: replace fake beat syncing with the proper thing
     uint64_t beatLength = 500;
-    uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+    uint64_t now = (uint64_t) std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()
-    ).count() - 50;
+    ).count() - (uint64_t) 50;
 
     uint64_t timeSinceBeat = now % beatLength;
 

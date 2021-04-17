@@ -17,7 +17,6 @@ ThermalComponent::ThermalComponent(
     blobSize = blobSize_;
     gradientFrom = gradientFrom_;
     gradientTo = gradientTo_;
-    minRadius = 48.0;
 
     blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
 

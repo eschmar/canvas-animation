@@ -66,6 +66,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
     size_t pointCount = blobCount;
     // pointCount = 1;
 
+    float halfSize = size * 0.5f;
+
     // Angle in radians between each point.
     float theta = (float) (M_PI * 2.0 / verticeCount);
 
@@ -75,11 +77,25 @@ void ThermalComponent::paint(juce::Graphics& g) {
         float percent = (float) i / (pointCount - 1);
         float baseRadius = blobSize + (stepSize * i);
         float radius = baseRadius + (baseRadius * epsilon * (1.0f - percent) * (blobRadius[0] - 0.5f) * 2);
-
         float bezierDistance = calculateBezierDistance(radius) * roundness;
 
-        float prevX = position.x() + radius * (float) std::cos(0 + wobbler);
-        float prevY = position.y() + radius * (float) std::sin(0 + wobbler);
+        // Add perspective to blobs by offsetting the position slightly
+        float distance = position.distance(Point<float>(halfSize, halfSize));
+        float beta = std::atan((position.y() - halfSize) / (position.x() - halfSize));
+        if (position.x() < halfSize) beta += (float) M_PI; // Adjust theta depending on quadrant
+
+        float offset = i * stepSize * 3 * (distance / (size - inset) * 0.5f); // The farther from origin the more offset
+
+        Point<float> localCenter = Point<float>(
+            halfSize + (distance - offset) * std::cos(beta),
+            halfSize + (distance - offset) * std::sin(beta)
+        );
+
+        // Avoid divide by zero, which will break tweening
+        if (distance == 0) localCenter = Point<float>(position);
+
+        float prevX = localCenter.x() + radius * (float) std::cos(0 + wobbler);
+        float prevY = localCenter.y() + radius * (float) std::sin(0 + wobbler);
 
         // g.setColour(juce::Colour(0x77ed6809));
         // g.fillEllipse(prevX - 5, prevY - 5, 10, 10);
@@ -94,8 +110,8 @@ void ThermalComponent::paint(juce::Graphics& g) {
             float vy = std::sin(theta * j + wobbler);
 
             // next point position
-            float px = position.x() + radius * vx;
-            float py = position.y() + radius * vy;
+            float px = localCenter.x() + radius * vx;
+            float py = localCenter.y() + radius * vy;
 
             // g.setColour(juce::Colour(0x7709e6ed));
             // g.fillEllipse(px - 5, py - 5, 10, 10);

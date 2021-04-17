@@ -8,7 +8,7 @@ ThermalComponent::ThermalComponent(
     float blobSize_,
     juce::Colour gradientFrom_,
     juce::Colour gradientTo_
-) : TrackpadComponent(size_, inset_, fps_), position(size_ * 0.5f, size_ * 0.5f), target(size_ * 0.5f, size_ * 0.5f) {
+) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond(fps_);
     fps = fps_;
@@ -17,6 +17,9 @@ ThermalComponent::ThermalComponent(
     blobSize = blobSize_;
     gradientFrom = gradientFrom_;
     gradientTo = gradientTo_;
+
+    position = Point<float>(size_ * 0.5f, size_ * 0.5f);
+    target = Point<float>(size_ * 0.5f, size_ * 0.5f);
 
     blobCount = (size_t) ((getWidth() - inset - blobSize) / stepSize);
 
@@ -182,8 +185,8 @@ void ThermalComponent::mouseDrag(const juce::MouseEvent& event) {
 
     // map coordinates to unit circle
     // http://squircular.blogspot.com/2015/09/mapping-circle-to-square.html
-    float u = (float) (x - halfSize) / radius;
-    float v = (float) (y - halfSize) / radius;
+    float u = (float) (position.x() - halfSize) / radius; // ATTENTION: use target instead?
+    float v = (float) (position.y() - halfSize) / radius; // ATTENTION: use target instead?
 
     // convert circle to square
     double u2 = u * u;

@@ -10,16 +10,16 @@ UnknownPleasuresComponent::UnknownPleasuresComponent(
 ) : TrackpadComponent(size_, inset_, fps_) {
     setSize(size_, size_);
     setFramesPerSecond (fps_);
-    x = getWidth() * 0.5f;
-    y = getHeight() * 0.5f;
+    position = Point<float>(size_ * 0.5f, size_ * 0.5f);
+    target = Point<float>(size_ * 0.5f, size_ * 0.5f);
     verticalOffset = verticalOffset_;
     horizontalStepOffset = horizontalStepOffset_;
     radius = radius_;
 
     int rowCount = (int) std::floor((float) (getHeight() - inset) / verticalOffset) + 1;
     int colCount = (getWidth() - inset) / horizontalStepOffset + 1;
-    position.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
-    target.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
+    linesPosition.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
+    linesTarget.resize((size_t) rowCount, std::vector<float>((size_t) colCount));
     computeTarget(true);
 
     start = (uint64_t) std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -32,13 +32,13 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
     g.setColour(juce::Colours::white);
 
     float halfInset = 0.5f * inset;
-    for (size_t i = 0; i < position.size(); i++) {
+    for (size_t i = 0; i < linesPosition.size(); i++) {
         juce::Path wave;
         g.setColour(juce::Colours::white);
 
-        for (size_t j = 0; j < position[0].size(); j++) {
+        for (size_t j = 0; j < linesPosition[0].size(); j++) {
             if (j == 0) {
-                wave.startNewSubPath(juce::Point<float>(halfInset, position[i][j]));
+                wave.startNewSubPath(juce::Point<float>(halfInset, linesPosition[i][j]));
                 continue;
             }
 
@@ -47,7 +47,7 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
             float bezierX1 = currentX - 0.8f * horizontalStepOffset;
             float bezierX2 = currentX - 0.2f * horizontalStepOffset;
 
-            wave.cubicTo(bezierX1, position[i][j - 1], bezierX2, position[i][j], currentX, position[i][j]);
+            wave.cubicTo(bezierX1, linesPosition[i][j - 1], bezierX2, linesPosition[i][j], currentX, linesPosition[i][j]);
         }
 
         g.strokePath(wave, juce::PathStrokeType(3.0f));
@@ -62,10 +62,7 @@ void UnknownPleasuresComponent::paint(juce::Graphics& g) {
 }
 
 void UnknownPleasuresComponent::mouseDrag(const juce::MouseEvent& event) {
-    // printf("X>>> <x,y>=<%d,%d>\n", event.x, event.y);
     TrackpadComponent::mouseDrag(event);
-    // printf("Y>>> <x',y'>=<%.2f,%.2f>\n", x, y);
-
     computeTarget();
 }
 
@@ -74,13 +71,13 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
     float waveyOffset = verticalOffset * 0.2f;
     float halfInset = 0.5f * inset;
 
-    for (size_t i = 0; i < target.size(); i++) {
+    for (size_t i = 0; i < linesTarget.size(); i++) {
         float currentY = halfInset + (float) i * verticalOffset;
 
-        for (size_t j = 0; j < target[0].size(); j++) {
+        for (size_t j = 0; j < linesTarget[0].size(); j++) {
             float currentX = halfInset + (float) j * horizontalStepOffset;
 
-            double distance = euclideanDistance(currentX, currentY, (float) x, (float) y);
+            double distance = Point<float>::distance(currentX, currentY, target.x(), target.y());
             // float distance = std::abs(x - currentX); // Joy Division example
 
             float ratio = (float) distance / radius;
@@ -92,8 +89,8 @@ void UnknownPleasuresComponent::computeTarget(bool fastforward) {
             // attemp sort of wavey line
             shift += (juce::Random::getSystemRandom().nextFloat() * waveyOffset) - waveyOffset * 0.5f;
 
-            target[i][j] = currentY - shift;
-            if (fastforward) position[i][j] = currentY - shift;
+            linesTarget[i][j] = currentY - shift;
+            if (fastforward) linesPosition[i][j] = currentY - shift;
         }
     }
 }
@@ -112,9 +109,9 @@ void UnknownPleasuresComponent::update() {
     }
 
     // basic tweening
-    for (size_t i = 0; i < position.size(); i++) {
-        for (size_t j = 0; j < position[0].size(); j++) {
-            position[i][j] += (target[i][j] - position[i][j]) * 0.1f;
+    for (size_t i = 0; i < linesPosition.size(); i++) {
+        for (size_t j = 0; j < linesPosition[0].size(); j++) {
+            linesPosition[i][j] += (linesTarget[i][j] - linesPosition[i][j]) * 0.1f;
         }
     }
 }

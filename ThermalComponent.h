@@ -35,7 +35,6 @@ public:
     void update() override;
 
 private:
-    Point<float> position, target;
     std::vector<float> blobRadius, blobRadiusTarget;
 
     size_t verticeCount = 6, blobCount;

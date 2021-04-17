@@ -31,7 +31,7 @@ public:
 private:
     uint64_t start = 0;
     int verticalOffset, horizontalStepOffset, radius;
-    std::vector<std::vector<float>> position, target;
+    std::vector<std::vector<float>> linesPosition, linesTarget;
     void computeTarget(bool fastforward = false);
 
     // Your private member variables go here...

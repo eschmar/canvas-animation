@@ -1,4 +1,4 @@
-## Canvas Animation Experiments
+## Canvas Animation Experiments
 
 ```
 make clean sketch_icons

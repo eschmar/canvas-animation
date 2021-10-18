@@ -1,4 +1,8 @@
-## Canvas Animation Experiments
+# Canvas Animation Experiments
+
+https://user-images.githubusercontent.com/2345471/137802875-c386300f-4582-44eb-a5ee-a711fa45d52e.mp4
+
+## build
 
 ```
 make clean sketch_icons

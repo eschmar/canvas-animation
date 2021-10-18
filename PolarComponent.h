@@ -15,7 +15,7 @@
 class PolarComponent : public TrackpadComponent {
 public:
     PolarComponent(
-        int size_ = 512,
+        int size_ = TRACKPAD_DEFAULT_SIZE,
         int inset_ = 96,
         int fps_ = 60
     );

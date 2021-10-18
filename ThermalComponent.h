@@ -14,7 +14,7 @@
 */
 class ThermalComponent : public TrackpadComponent {
 public:
-    ThermalComponent() : ThermalComponent(512) {}
+    ThermalComponent() : ThermalComponent(TRACKPAD_DEFAULT_SIZE) {}
     ThermalComponent(
         int size_,
         int inset_ = 96,

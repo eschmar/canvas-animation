@@ -14,7 +14,7 @@
 */
 class GridTrackpadComponent : public TrackpadComponent {
 public:
-    GridTrackpadComponent() : GridTrackpadComponent(512) {}
+    GridTrackpadComponent() : GridTrackpadComponent(TRACKPAD_DEFAULT_SIZE) {}
     GridTrackpadComponent(int size_, int inset_ = 96, int fps_ = 60, float radius_ = 96, float gridSize_ = 12, float maxPointSize_ = 6);
     void paint (juce::Graphics&) override;
     void resized() override;

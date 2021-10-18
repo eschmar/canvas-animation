@@ -7,12 +7,14 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "Point.h"
 
+#define TRACKPAD_DEFAULT_SIZE 512
+
 /**
  * Base component
  */
 class TrackpadComponent : public juce::AnimatedAppComponent {
 public:
-    TrackpadComponent() : TrackpadComponent(512, 96, 60) {}
+    TrackpadComponent() : TrackpadComponent(TRACKPAD_DEFAULT_SIZE, 96, 60) {}
     TrackpadComponent(int size_, int inset_ = 0, int fps_ = 60);
     void paint (juce::Graphics&) override;
     void mouseDrag(const juce::MouseEvent& event) override;

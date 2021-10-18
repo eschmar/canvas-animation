@@ -13,7 +13,7 @@
 */
 class UnknownPleasuresComponent : public TrackpadComponent {
 public:
-    UnknownPleasuresComponent() : UnknownPleasuresComponent(512) {}
+    UnknownPleasuresComponent() : UnknownPleasuresComponent(TRACKPAD_DEFAULT_SIZE) {}
     UnknownPleasuresComponent(
         int size_,
         int inset_ = 96,

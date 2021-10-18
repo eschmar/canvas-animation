@@ -68,6 +68,9 @@ public:
 
             setUsingNativeTitleBar(true);
             setContentOwned(new UnknownPleasuresComponent(canvasSize), true);
+            // setContentOwned(new ThermalComponent(canvasSize), true);
+            // setContentOwned(new GridTrackpadComponent(canvasSize), true);
+            // setContentOwned(new PolarComponent(canvasSize), true);
 
         #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(false);

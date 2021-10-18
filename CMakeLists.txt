@@ -18,7 +18,7 @@ option(JUCE_BUILD_EXAMPLES "Build JUCE Examples" OFF)
 CPMAddPackage(
     NAME JUCE
     GITHUB_REPOSITORY juce-framework/JUCE
-    GIT_TAG 6.0.7
+    GIT_TAG 6.1.2
 )
 
 # If your app depends the VST2 SDK, perhaps to host VST2 plugins, CMake needs to be told where

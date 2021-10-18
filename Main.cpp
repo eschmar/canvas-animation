@@ -61,10 +61,11 @@ public:
                 DocumentWindow::allButtons
         ) {
             setUsingNativeTitleBar(true);
-            setContentOwned(new ThermalComponent(), true);
+            setContentOwned(new UnknownPleasuresComponent(), true);
 
         #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(false);
+            centreWithSize(getWidth(), getHeight());
         #else
             setResizable(false, false);
             centreWithSize(getWidth(), getHeight());

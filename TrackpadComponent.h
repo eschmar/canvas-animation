@@ -8,6 +8,7 @@
 #include "Point.h"
 
 #define TRACKPAD_DEFAULT_SIZE 512
+// #define TRACKPAD_DEFAULT_SIZE 390 // iPhone12
 
 /**
  * Base component

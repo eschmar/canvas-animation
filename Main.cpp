@@ -60,8 +60,14 @@ public:
                 .findColour(ResizableWindow::backgroundColourId),
                 DocumentWindow::allButtons
         ) {
+            int canvasSize = 512;
+
+        #if JUCE_IOS
+            canvasSize = 390; // iPhone12
+        #endif
+
             setUsingNativeTitleBar(true);
-            setContentOwned(new UnknownPleasuresComponent(), true);
+            setContentOwned(new UnknownPleasuresComponent(canvasSize), true);
 
         #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(false);

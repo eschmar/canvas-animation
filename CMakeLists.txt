@@ -35,7 +35,7 @@ juce_add_gui_app(AnimationPlayground
     ICON_BIG build/res/AppIcon.iconset/icon_512x512@2x.png
     ICON_SMALL build/res/AppIcon.iconset/icon_512x512.png
     # DOCUMENT_EXTENSIONS ...           # Specify file extensions that should be associated with this app
-    COMPANY_NAME "eschmann.io"          # Specify the name of the app's author
+    COMPANY_NAME "eschmann.dev"          # Specify the name of the app's author
     PRODUCT_NAME "AnimationPlayground"  # The name of the final executable, which can differ from the target name
 )
 
